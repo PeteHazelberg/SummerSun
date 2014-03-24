@@ -4,7 +4,7 @@ using SummerSun;
 
 namespace SummerSunConsoleHost
 {
-    class NinjectBindings : NinjectModule
+    class SummerSunNinjectBindings : NinjectModule
     {
         public override void Load()
         {
