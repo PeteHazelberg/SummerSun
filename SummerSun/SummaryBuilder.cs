@@ -42,10 +42,6 @@ namespace SummerSun
         public TResult HttpGet<TResult>(Guid customerGuid, string url)
         {
             var token = tokens.Get(customerGuid);
-
-            // ignore bad SSL certificates
-            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
-
             TResult result = default(TResult);
 
             try

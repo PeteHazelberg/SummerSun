@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using Mono.Options;
 using Ninject;
 using SummerSun;
@@ -13,13 +14,13 @@ namespace SummerSunConsoleHost
     {
         static void Main(string[] args)
         {
-            string companyId = null;
+            string companySearch = "";
             string equipmentType = "Chiller";
             string pointRoleType = "ChillerStatus";
             int pageSize = 10;
 
             var commandLineParams = new OptionSet()
-                .Add("c|companyId=", c => companyId = c)
+                .Add("c|company=", c => companySearch = c)
                 .Add("e|equipmentType=", e => equipmentType = e)
                 .Add("pr|pointRoleType=", pr => pointRoleType = pr)
                 .Add("ps|pageSize=", ps => int.TryParse(ps, out pageSize));
@@ -27,18 +28,27 @@ namespace SummerSunConsoleHost
             IKernel kernel = new StandardKernel();
             kernel.Load(new Jci.Panoptix.Cda.Building.BuildingStorageNinjectModule());
             kernel.Load(new SummerSunNinjectBindings());
+            Console.WriteLine("INPUT: CompanySearch= {0} EquipmentType={1}  PointRoleType={2}  pageSize={3}", companySearch, equipmentType, pointRoleType, pageSize);
 
-            if (companyId == null)
-            {
-                companyId = PromptToChooseCompany(kernel, companyId);
-            }
-            Console.WriteLine("Company={0}  EquipmentType={1}  PointRoleType={2}  pageSize={3}", companyId, equipmentType, pointRoleType, pageSize);
+            var company = PromptToChooseCompany(kernel, companySearch);
 
             var sun = kernel.Get<SummaryBuilder>();
-            Console.WriteLine("Searching...");
+            Console.WriteLine("Searching {0} ...", company.Name);
+            var equip = new Dictionary<string, Equipment>();
             var watch = new Stopwatch();
             watch.Start();
-            var equip = sun.GetEquipmentAndPointRoles(ToCustomerId(companyId), equipmentType, null, 0, pageSize).ToDictionary(e => e.Id, e => e);
+            try
+            {
+                equip = sun.GetEquipmentAndPointRoles(ToCustomerId(company.Id), equipmentType, null, 0, pageSize).ToDictionary(e => e.Id, e => e);
+            }
+            catch (HttpRequestException httpExc)
+            {
+                if (httpExc.Message.Contains("customer"))
+                {
+                    Console.WriteLine("The {0} customer does not actually exist in this environment.", company.Name);
+                    return;
+                }
+            }
             watch.Stop();
             Console.WriteLine("Found {0} equipment ({1}ms)", equip.Count(), watch.ElapsedMilliseconds);
             var equip2Roles = new Dictionary<string, IList<PointRole>>();
@@ -65,31 +75,23 @@ namespace SummerSunConsoleHost
             {
                 var ptIds = new HashSet<string>((from roleList in equip2Roles.Values from role in roleList select role.Point.Id));
                 watch.Restart();
-                var pts = sun.GetPoints(ToCustomerId(companyId), ptIds).ToList();
+                var pts = sun.GetPoints(ToCustomerId(company.Id), ptIds).ToList();
                 watch.Stop();
                 Console.WriteLine("Found {0} points ({1}ms)", pts.Count(), watch.ElapsedMilliseconds); 
                 foreach (var pt in pts)
                 {
                     var ptId = pt.Id;
-                    foreach (var eq in equip.Values)
+                    foreach (var role in equip.Values.Where(eq => eq.PointRoles != null && eq.PointRoles.Items != null).SelectMany(eq => eq.PointRoles.Items.Where(r => r.Point.Id == ptId)))
                     {
-                        if (eq != null && eq.PointRoles != null && eq.PointRoles.Items != null)
-                        {
-                            foreach (var role in eq.PointRoles.Items.Where(r => r.Point.Id == ptId))
-                            {
-                                role2Point.Add(role.Id, pt); 
-                            }
-                        }
+                        role2Point.Add(role.Id, pt);
                     }
-                };
+                }
             }
-            const string tablePattern = "|{0,-40}|{1,-40}|{2,-12}|{3,12}|{4,12}|{5,12}|";
-            const string dashes20 = "--------------------";
-            const string dashes40 = dashes20 + dashes20;
-            const string dashes12 = "------------";
-            Console.WriteLine(tablePattern, dashes40, dashes40, dashes12, dashes12, dashes12, dashes12);
+            const string tablePattern = "|{0,-40}|{1,-40}|{2,-20}|{3,12}|{4,12}|{5,12}|";
+            DrawTableLine(tablePattern);
             Console.WriteLine(tablePattern, equipmentType, pointRoleType, "Units", "Sample Count", "Minimum", "Maximum");
-            Console.WriteLine(tablePattern, dashes40, dashes40, dashes12, dashes12, dashes12, dashes12); 
+            DrawTableLine(tablePattern);
+
             foreach (var eId in equip.Keys)
             {
                 if (equip2Roles.ContainsKey(eId))
@@ -112,32 +114,45 @@ namespace SummerSunConsoleHost
                 else
                     Console.WriteLine(tablePattern, equip[eId].Name, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
             }
-            Console.WriteLine(tablePattern, dashes40, dashes40, dashes12, dashes12, dashes12, dashes12); 
+            DrawTableLine(tablePattern);
             Console.ReadKey();
         }
 
-        private static string PromptToChooseCompany(IKernel kernel, string companyId)
+        private static void DrawTableLine(string tablePattern)
+        {
+            const string dashes20 = "--------------------";
+            const string dashes40 = dashes20 + dashes20;
+            const string dashes12 = "------------";
+            Console.WriteLine(tablePattern, dashes40, dashes40, dashes20, dashes12, dashes12, dashes12);
+        }
+
+        private static Jci.Panoptix.Cda.Building.Company PromptToChooseCompany(IKernel kernel, string companySearch)
         {
             var compRepo = kernel.Get<Jci.Panoptix.Cda.Building.Storage.ICompanyRepository>();
-            var companies = compRepo.Get().ToList();
-            var compIndex = new Dictionary<int, Jci.Panoptix.Cda.Building.Company>(companies.Count());
-            int ci;
-            for (var i = 1; i < companies.Count(); i++)
+            var allCompanies = compRepo.Get().ToList();
+            int ci, num = 0;
+            var compIndex = allCompanies.Where(c => c.Name.ToLowerInvariant().Contains(companySearch.ToLowerInvariant())).ToDictionary(c => ++num);
+            if (compIndex.Count == 1)
             {
-                compIndex.Add(i, companies[i]);
+                return compIndex[1];
+            }
+            if (compIndex.Count == 0)
+            {
+                num = 0;
+                compIndex = allCompanies.ToDictionary(c => ++num);
             }
             string input = null;
             while (!Int32.TryParse(input, out ci))
             {
                 Console.WriteLine("Choose a company to view:");
-                for (var i = 1; i < companies.Count(); i++)
+                foreach(var num2Comp in compIndex)
                 {
-                    Console.WriteLine("{0,4}  {1}", i, companies[i].Name);
+                    Console.WriteLine("{0,4}  {1}", num2Comp.Key, num2Comp.Value.Name);
                 }
+                Console.Write("Enter a company number:");
                 input = Console.ReadLine();
             }
-            companyId = compIndex[ci].Id;
-            return companyId;
+            return compIndex[ci];
         }
 
         public static Guid ToCustomerId(string companyId)
