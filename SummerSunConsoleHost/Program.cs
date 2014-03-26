@@ -37,7 +37,7 @@ namespace SummerSun
             watch.Start();
             try
             {
-                equip = sun.GetEquipmentAndPointRoles(ToCustomerId(company.Id), equipmentType, null, 0, pageSize).ToDictionary(e => e.Id, e => e);
+                equip = sun.GetEquipmentAndPointRoles(equipmentType, company, 0, pageSize).ToDictionary(e => e.Id, e => e);
             }
             catch (HttpRequestException httpExc)
             {
@@ -73,7 +73,7 @@ namespace SummerSun
             {
                 var ptIds = new HashSet<string>((from roleList in equip2Roles.Values from role in roleList select role.Point.Id));
                 watch.Restart();
-                var pts = sun.GetPointsAndSummary(ToCustomerId(company.Id), ptIds).ToList();
+                var pts = sun.GetPointsAndSummary(ptIds, company).ToList();
                 watch.Stop();
                 Console.WriteLine("Found {0} points ({1}ms)", pts.Count(), watch.ElapsedMilliseconds); 
                 foreach (var pt in pts)
@@ -151,13 +151,6 @@ namespace SummerSun
                 input = Console.ReadLine();
             }
             return compIndex[ci];
-        }
-
-        public static Guid ToCustomerId(string companyId)
-        {
-            var data = companyId.Replace("_", "/").Replace("-", "+") + "==";
-            var id = Convert.FromBase64String(data);
-            return new Guid(id);
         }
     }
 }

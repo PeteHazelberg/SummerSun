@@ -11,9 +11,9 @@ namespace BuildingApi
     public static class HttpHelper
     {
 
-        public static T Get<T>(Guid customerGuid, string url, ITokenProvider tokens)
+        public static T Get<T>(Company company, string url, ITokenProvider tokens)
         {
-            return Get<T>(url, tokens.Get(customerGuid));
+            return Get<T>(url, tokens.Get(company));
         }
 
         public static T Get<T>(string url, Token token)

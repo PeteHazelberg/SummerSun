@@ -40,16 +40,16 @@ namespace BuildingApi
         /// <summary>
         /// Get a security token
         /// </summary>
-        /// <param name="customerId"></param>
+        /// <param name="company"></param>
         /// <param name="invalidateCache">if set to true, requests a new token even if a valid one is already in the cache</param>
         /// <returns></returns>
-        public Token Get(Guid customerId = default(Guid), bool invalidateCache = false)
+        public Token Get(Company company = null, bool invalidateCache = false)
         {
             var now = DateTime.UtcNow;
             Token token;
 
             // so that instances created by different applications (as indicated by id passed at construction) don't clobber each other
-            string cacheKey = String.Format("{0}:{1}", clientId, customerId);
+            string cacheKey = String.Format("{0}:{1}", clientId, company == null ? string.Empty: company.Id);
 
             // check to see if we already have a token that will be valid for at least the next five minutes
             if (!invalidateCache && Cache.ContainsKey(cacheKey) && Cache[cacheKey].ExpirationTime > now.AddMinutes(5))
@@ -79,9 +79,9 @@ namespace BuildingApi
                             new KeyValuePair<string, string>("grant_type", "client_credentials")
                         };
 
-                        if (customerId != Guid.Empty)
+                        if (company != null && company.Id != null)
                         {
-                            contentList.Add(new KeyValuePair<string, string>("jci_company_id", customerId.ToString()));
+                            contentList.Add(new KeyValuePair<string, string>("jci_company_id", company.Id));
                             contentList.Add(new KeyValuePair<string, string>("scope", "panoptix.read panoptix.write panoptix.manage panoptix.delete"));
                         }
                         var content = new FormUrlEncodedContent(contentList);
@@ -93,14 +93,14 @@ namespace BuildingApi
                             var item = JsonConvert.DeserializeObject<Token>(response.Content.ReadAsStringAsync().Result, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), NullValueHandling = NullValueHandling.Ignore });
                             token.AccessToken = item.AccessToken;
                             token.ExpirationTime = now + TimeSpan.FromSeconds(item.ExpiresInSeconds);
-                            token.CustomerId = customerId;
+                            token.Company = company;
 
                             Cache.AddOrUpdate(cacheKey, token, (key, value) =>
                                 {
                                     value.AccessToken = token.AccessToken;
                                     value.ExpirationTime = token.ExpirationTime;
                                     value.Status = token.Status;
-                                    value.CustomerId = token.CustomerId;
+                                    value.Company = token.Company;
                                     return value;
                                 });
                         }
@@ -122,7 +122,6 @@ namespace BuildingApi
                     throw;
                 }
             }
-
             return token;
         }
     }

@@ -16,7 +16,7 @@ namespace BuildingApi
         public DateTime ExpirationTime { get; set; }
 
         [JsonIgnore]
-        public Guid CustomerId { get; set; }
+        public Company Company { get; set; }
 
         [JsonIgnore]
         public HttpStatusCode Status { get; set; }
