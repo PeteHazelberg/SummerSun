@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Logging;
 using Microsoft.WindowsAzure;
 
-namespace SummerSunConsoleHost
+namespace SummerSun
 {
     public static class Settings
     {

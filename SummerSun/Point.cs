@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace SummerSun.Api
+namespace BuildingApi
 {
     public class Point : EntityLink, IEquatable<Point>
     {

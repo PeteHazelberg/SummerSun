@@ -1,4 +1,4 @@
-﻿namespace SummerSun.Api
+﻿namespace BuildingApi
 {
     public class SampleSummary : Link
     {

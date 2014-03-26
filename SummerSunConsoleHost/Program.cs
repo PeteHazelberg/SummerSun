@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using BuildingApi;
 using Mono.Options;
 using Ninject;
-using SummerSun;
-using SummerSun.Api;
 
-namespace SummerSunConsoleHost
+namespace SummerSun
 {
     class Program
     {
@@ -26,13 +25,12 @@ namespace SummerSunConsoleHost
                 .Add("ps|pageSize=", ps => int.TryParse(ps, out pageSize));
             commandLineParams.Parse(args);
             IKernel kernel = new StandardKernel();
-            kernel.Load(new Jci.Panoptix.Cda.Building.BuildingStorageNinjectModule());
             kernel.Load(new SummerSunNinjectBindings());
             Console.WriteLine("INPUT: CompanySearch= {0} EquipmentType={1}  PointRoleType={2}  pageSize={3}", companySearch, equipmentType, pointRoleType, pageSize);
 
             var company = PromptToChooseCompany(kernel, companySearch);
 
-            var sun = kernel.Get<SummaryBuilder>();
+            var sun = kernel.Get<EquipmentClient>();
             Console.WriteLine("Searching {0} ...", company.Name);
             var equip = new Dictionary<string, Equipment>();
             var watch = new Stopwatch();
@@ -75,7 +73,7 @@ namespace SummerSunConsoleHost
             {
                 var ptIds = new HashSet<string>((from roleList in equip2Roles.Values from role in roleList select role.Point.Id));
                 watch.Restart();
-                var pts = sun.GetPoints(ToCustomerId(company.Id), ptIds).ToList();
+                var pts = sun.GetPointsAndSummary(ToCustomerId(company.Id), ptIds).ToList();
                 watch.Stop();
                 Console.WriteLine("Found {0} points ({1}ms)", pts.Count(), watch.ElapsedMilliseconds); 
                 foreach (var pt in pts)
@@ -126,9 +124,9 @@ namespace SummerSunConsoleHost
             Console.WriteLine(tablePattern, dashes40, dashes40, dashes20, dashes12, dashes12, dashes12);
         }
 
-        private static Jci.Panoptix.Cda.Building.Company PromptToChooseCompany(IKernel kernel, string companySearch)
+        private static Company PromptToChooseCompany(IKernel kernel, string companySearch)
         {
-            var compRepo = kernel.Get<Jci.Panoptix.Cda.Building.Storage.ICompanyRepository>();
+            var compRepo = kernel.Get<ICompanyProvider>();
             var allCompanies = compRepo.Get().ToList();
             int ci, num = 0;
             var compIndex = allCompanies.Where(c => c.Name.ToLowerInvariant().Contains(companySearch.ToLowerInvariant())).ToDictionary(c => ++num);
