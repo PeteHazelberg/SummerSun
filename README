@@ -1,0 +1,2 @@
+SummerSun demonstrates a some simple uses of Johnson Controls' Building API. It displays summaries of sensor data that has been deposited within the Panoptix software as a service. 
+You'll need developer credentials issued by Johnson Controls to try it out. You can request credentials here:
