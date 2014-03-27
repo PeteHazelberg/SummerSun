@@ -31,7 +31,7 @@ namespace SummerSun
             var company = PromptToChooseCompany(kernel, companySearch);
 
             var sun = kernel.Get<EquipmentClient>();
-            Console.WriteLine("Searching {0} ...", company.Name);
+            Console.WriteLine("Searching company {0} ...", company.Name);
             var equip = new Dictionary<string, Equipment>();
             var watch = new Stopwatch();
             watch.Start();
@@ -48,7 +48,7 @@ namespace SummerSun
                 }
             }
             watch.Stop();
-            Console.WriteLine("Found {0} equipment ({1}ms)", equip.Count(), watch.ElapsedMilliseconds);
+            Console.WriteLine("Found {0} equipment with \"{1}\" in their type ({2}ms)", equip.Count(), equipmentType, watch.ElapsedMilliseconds);
             var equip2Roles = new Dictionary<string, IList<PointRole>>();
             var pointId2Equip = new Dictionary<string, string>();
             foreach (var e in equip.Values)
@@ -75,7 +75,7 @@ namespace SummerSun
                 watch.Restart();
                 var pts = sun.GetPointsAndSummary(ptIds, company).ToList();
                 watch.Stop();
-                Console.WriteLine("Found {0} points ({1}ms)", pts.Count(), watch.ElapsedMilliseconds); 
+                Console.WriteLine("Found {0} points on those equipment with \"{1}\" in role type ({2}ms)", pts.Count(), pointRoleType, watch.ElapsedMilliseconds); 
                 foreach (var pt in pts)
                 {
                     var ptId = pt.Id;
@@ -87,7 +87,7 @@ namespace SummerSun
             }
             const string tablePattern = "|{0,-40}|{1,-40}|{2,-20}|{3,12}|{4,12}|{5,12}|";
             DrawTableLine(tablePattern);
-            Console.WriteLine(tablePattern, equipmentType, pointRoleType, "Units", "Sample Count", "Minimum", "Maximum");
+            Console.WriteLine(tablePattern, '"' + equipmentType + '"', '"' + pointRoleType + '"', "Units", "Sample Count", "Minimum", "Maximum");
             DrawTableLine(tablePattern);
 
             foreach (var eId in equip.Keys)
