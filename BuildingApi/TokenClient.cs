@@ -106,7 +106,8 @@ namespace BuildingApi
                         }
                         else
                         {
-                            var message = string.Format("Unable to Get Token from: {0}{1}Status: {2} {3} {1}Reason: {4}",  endpointUrl, Environment.NewLine, (int)response.StatusCode, response.StatusCode, response.ReasonPhrase);
+                            var errorDescription = response.Content.ReadAsStringAsync().Result;
+                            var message = string.Format("Unable to Get Token from: {0}{1}Status: {2} {3} {1}Reason: {4} ErrorDescription: {5}", endpointUrl, Environment.NewLine, (int)response.StatusCode, response.StatusCode, response.ReasonPhrase, errorDescription);
                             log.WarnFormat(message);
                             Token removeToken;
                             Cache.TryRemove(cacheKey, out removeToken);
