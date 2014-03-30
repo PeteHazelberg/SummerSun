@@ -59,6 +59,7 @@
     <Compile Include="CompanyClient.cs" />
     <Compile Include="EntityLink.cs" />
     <Compile Include="Equipment.cs" />
+    <Compile Include="EquipmentType.cs" />
     <Compile Include="HttpHelper.cs" />
     <Compile Include="ICompanyProvider.cs" />
     <Compile Include="ITokenProvider.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="TokenClient.cs" />
     <Compile Include="EquipmentClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypesClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

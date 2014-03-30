@@ -1,0 +1,43 @@
+﻿@model SummerSunMVC.Models.SingleCompanyPointStatusVM
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Single Customer Point Dashboard</h2>
+<br />
+@using (Html.BeginForm("Index", "Points", FormMethod.Get))
+{
+    <p>
+        Company:@Html.DropDownListFor(x => x.SelectedCompany, 
+            new SelectList(Model.Companies, "Value", "Text"), "Select Company")
+        Equipment:@Html.DropDownListFor(x => x.SelectedEquipmentType,
+            new SelectList(Model.EquipmentTypes, "Value", "Text"), "Select Type")
+        Roles:@Html.DropDownListFor(x => x.SelectedRoleType,
+            new SelectList(Model.RoleTypes, "Value", "Text"), "Select Type")
+
+        <input type="submit" value="Show" />
+    </p>
+}
+
+<div>
+    @Html.Partial("PointStatusPartial", Model.PointsStatus)
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(function () {
+            $("#SelectedEquipmentType").change(function () {
+                var self = $(this);
+                var items = "";
+                $.getJSON("@Url.Action("GetSupportedRoles","Points")/?SelectedEquipmentType=" + self.val(),
+                                                                    function(data){
+                  $.each(data,function(index,item){
+                    items+="<option value='"+item.Value+"'>"+ item.Text +"</option>";
+                  });
+                  $("#SelectedRoleType").html(items);
+                });
+            });
+        });
+    </script>
+}

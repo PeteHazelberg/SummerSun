@@ -23,7 +23,8 @@ namespace BuildingApi
             {
                 return JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), NullValueHandling = NullValueHandling.Ignore });
             }
-            var message = string.Format("Unsuccessful GET: {0}{1}\tResponse: {2} {3} {4}", url, Environment.NewLine, response.StatusCode, response.StatusCode, response.ReasonPhrase);
+            var errorDescription = response.Content.ReadAsStringAsync().Result;
+            var message = string.Format("Unsuccessful GET: {0}{1}\tResponse: {2} {3} {4} {5}", url, Environment.NewLine, response.StatusCode, response.StatusCode, response.ReasonPhrase, errorDescription);
 
             if (response.StatusCode == HttpStatusCode.InternalServerError)
             {
