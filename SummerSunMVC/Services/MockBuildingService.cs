@@ -101,5 +101,13 @@ namespace SummerSunMVC.Services
             return equipmentList.Where(e => e.Type.Id == equipmentType);
         }
 
+        public IEnumerable<Point> GetPointsInfo(IEnumerable<string> ids, Company c)
+        {
+            List<Point> pointList = new List<Point>();
+
+
+            return pointList;
+        }
+
     }
 }

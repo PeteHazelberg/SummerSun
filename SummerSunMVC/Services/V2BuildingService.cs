@@ -45,8 +45,17 @@ namespace SummerSunMVC.Services
         public IEnumerable<Equipment> GetEquipmentByCompany(string equipmentType, Company company)
         {
             EquipmentClient client = BuildingAPIClient.EquipmentClient;
-
+            // TO DO
+            // Cache locally ?
             return client.GetEquipmentAndPointRoles(equipmentType, company);
         }
+
+        public IEnumerable<Point> GetPointsInfo(IEnumerable<string> ids, Company c)
+        {
+            List<Point> pointList = new List<Point>();
+
+            return BuildingAPIClient.EquipmentClient.GetPointsAndSummary(ids, c);
+        }
+
     }
 }

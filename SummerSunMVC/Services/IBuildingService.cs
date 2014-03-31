@@ -10,7 +10,8 @@ namespace SummerSunMVC.Services
     {
         IEnumerable<Company> GetCompanies();
         IEnumerable<EquipmentType> GetEquipmentTypes();
-        
-        IEnumerable<Equipment> GetEquipmentByCompany(string equipmentType, Company company); 
+        IEnumerable<Equipment> GetEquipmentByCompany(string equipmentType, Company company);
+
+        IEnumerable<Point> GetPointsInfo(IEnumerable<string> ids, Company c);
     }
 }
