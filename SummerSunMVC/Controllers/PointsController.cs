@@ -1,17 +1,15 @@
 ﻿using BuildingApi;
 using SummerSunMVC.Models;
 using SummerSunMVC.Services;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace SummerSunMVC.Controllers
 {
     public class PointsController : Controller
     {
-        private IBuildingService _buildingService = null;
+        private readonly IBuildingService _buildingService;
 
         public PointsController(IBuildingService service)
         {
@@ -20,26 +18,30 @@ namespace SummerSunMVC.Controllers
 
         public ActionResult Index(string selectedCompany, string selectedEquipmentType, string selectedRoleType)
         {
-            SingleCompanyPointStatusVM viewModel = new SingleCompanyPointStatusVM();
+            var viewModel = new SingleCompanyPointStatusVM();
             
             // Retrieve Companies
-            IEnumerable<Company> companies = _buildingService.GetCompanies();
-            List<SelectListItem> companieslist = new List<SelectListItem>();
-            foreach (var item in companies)
-                companieslist.Add(new SelectListItem { Value = item.Id, Text = item.Name });
+            var companies = _buildingService.GetCompanies().ToList();
+            var companieslist = companies.Select(comp => new SelectListItem
+            {
+                Value = comp.Id,
+                Text = comp.Name
+            }).ToList();
             viewModel.Companies = companieslist;
             viewModel.SelectedCompany = selectedCompany;
 
             // Retrieve Available Equipment Type and Role
-            IEnumerable<EquipmentType> types = _buildingService.GetEquipmentTypes();
-            List<SelectListItem> listItem = new List<SelectListItem>();
-            foreach (var item in types)
-                listItem.Add(new SelectListItem { Value = item.Id, Text = item.Name });
+            var types = _buildingService.GetEquipmentTypes().ToList();
+            var listItem = types.Select(type => new SelectListItem
+            {
+                Value = type.Id,
+                Text = type.Name
+            }).ToList();
             viewModel.EquipmentTypes = listItem;
             viewModel.SelectedEquipmentType = selectedEquipmentType;
             
             // If an equipmentType has been selected populate the Role accordenly
-            List<SelectListItem> roles = new List<SelectListItem>();
+            var roles = new List<SelectListItem>();
             if (!string.IsNullOrEmpty(selectedEquipmentType))
                 foreach (var item in types.First(t => t.Id == selectedEquipmentType).PointRoleTypes)
                     roles.Add(new SelectListItem { Value = item.Id, Text = item.Id });
@@ -56,11 +58,10 @@ namespace SummerSunMVC.Controllers
         public ActionResult GetSupportedRoles(string selectedEquipmentType)
         {
             IEnumerable<EquipmentType> types = _buildingService.GetEquipmentTypes();
-            List<SelectListItem> roles = new List<SelectListItem>();
-            
+            var roles = new List<SelectListItem>();
             foreach (var item in types.First(t => t.Id == selectedEquipmentType).PointRoleTypes)
-             roles.Add(new SelectListItem {Value = item.Id, Text = item.Id});   
-            
+                roles.Add(new SelectListItem { Value = item.Id, Text = item.Id });   
+
             return Json(roles, JsonRequestBehavior.AllowGet);
         }
 
@@ -71,26 +72,27 @@ namespace SummerSunMVC.Controllers
 
         private List<PointStatus> _retrievePoints(Company company, string type, string roleType)
         {
-            List<PointStatus> viewModelList = new List<PointStatus>();
-            if (company != null)
+            if (company == null)
             {
-                // TO DO
-                // Look into mappers if needed
-                IEnumerable<Equipment> equipList = _buildingService.GetEquipmentByCompany(type, company);
+                return new List<PointStatus>();
+            }
 
-                foreach (var item in equipList)
+            // TO DO
+            // Look into mappers if needed
+            var equipList = _buildingService.GetEquipmentByCompany(type, company);
+            var viewModelList = new List<PointStatus>();
+            foreach (var item in equipList)
+            {
+                PointRole pt = item.PointRoles.Items.FirstOrDefault(r => r.Type.Id == roleType);
+                var model = new PointStatus
                 {
-                    PointRole pt = item.PointRoles.Items.FirstOrDefault(r => r.Type.Id == roleType);
-                    PointStatus model = new PointStatus()
-                    {
-                        EquipmentName = item.Name,
-                        EquipmentId = item.Id,
-                        EquipmentType = item.Type.Id,
-                        PointRole = pt != null ? pt.Type.Id : "Not Available",
-                        PointId = pt != null ? pt.Id : string.Empty
-                    };
-                    viewModelList.Add(model);
-                }
+                    EquipmentName = item.Name,
+                    EquipmentId = item.Id,
+                    EquipmentType = item.Type.Id,
+                    PointRole = pt != null ? pt.Type.Id : "Not Available",
+                    PointId = pt != null ? pt.Id : string.Empty
+                };
+                viewModelList.Add(model);
             }
             return viewModelList;
         }
