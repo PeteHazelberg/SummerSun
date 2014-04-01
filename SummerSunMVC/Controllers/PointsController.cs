@@ -50,7 +50,7 @@ namespace SummerSunMVC.Controllers
             
             // Retrieve data for the partial view
             var company = companies.FirstOrDefault(c => c.Id == selectedCompany);
-            viewModel.PointsStatus = _retrievePoints(company, selectedEquipmentType, selectedRoleType);
+            viewModel.PointsStatus = _retrievePointsStatus(company, selectedEquipmentType, selectedRoleType);
 
             return View(viewModel);
         }
@@ -70,7 +70,7 @@ namespace SummerSunMVC.Controllers
             return View();
         }
 
-        private List<PointStatus> _retrievePoints(Company company, string type, string roleType)
+        private List<PointStatus> _retrievePointsStatus(Company company, string type, string roleType)
         {
             if (company == null)
             {
@@ -78,23 +78,47 @@ namespace SummerSunMVC.Controllers
             }
 
             // TO DO
-            // Look into mappers if needed
+            // Let's assume to build a table with a single point per row
             var equipList = _buildingService.GetEquipmentByCompany(type, company);
-            var viewModelList = new List<PointStatus>();
+            var viewModelMap = new Dictionary<string, PointStatus>();
+
             foreach (var item in equipList)
             {
                 PointRole pt = item.PointRoles.Items.FirstOrDefault(r => r.Type.Id == roleType);
-                var model = new PointStatus
+                // For now let's filter out equipment without the requested pointrole.
+                // Not sure if we need them or not
+                if (pt != null)
                 {
-                    EquipmentName = item.Name,
-                    EquipmentId = item.Id,
-                    EquipmentType = item.Type.Id,
-                    PointRole = pt != null ? pt.Type.Id : "Not Available",
-                    PointId = pt != null ? pt.Id : string.Empty
-                };
-                viewModelList.Add(model);
+                    var model = new PointStatus
+                    {
+                        EquipmentName = item.Name,
+                        EquipmentId = item.Id,
+                        EquipmentType = item.Type.Id,
+                        PointRole = pt.Type.Id,
+                        PointId = pt.Point.Id
+                    };
+                    viewModelMap.Add(model.PointId, model);
+                }
             }
-            return viewModelList;
+
+            if (viewModelMap.Count == 0)
+            {
+                return new List<PointStatus>();
+            }
+
+            var pointsInfo = _buildingService.GetPointsSummary(viewModelMap.Keys, company);
+            foreach (var item in pointsInfo)
+            {
+                if (viewModelMap.ContainsKey(item.Id))
+                {
+                    viewModelMap[item.Id].UoM = item.Units.Id ?? item.States.Id;
+                    // TO DO
+                    // To be replaced with last value
+                    viewModelMap[item.Id].LastValue = item.SampleSummary.MaxValue.ToString();
+                }
+            }
+
+            return viewModelMap.Values.ToList();
         }
     }
 }

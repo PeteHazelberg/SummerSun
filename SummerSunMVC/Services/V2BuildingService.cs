@@ -12,23 +12,24 @@ namespace SummerSunMVC.Services
     {
         private const string K_COMPANIES_CACHE_KEY = "Companies";
         private const string K_EQUIPMENTTYPES_CACHE_KEY = "EquipmentTypes";
+        private const int _cacheExpirationTimeInMinutes = 30;
 
         public IEnumerable<Company> GetCompanies()
         { 
             // No need to get back to Px everytime
-            IEnumerable<Company> companies = HttpRuntime.Cache.Get(K_COMPANIES_CACHE_KEY) as IEnumerable<Company>;
+            var companies = HttpRuntime.Cache.Get(K_COMPANIES_CACHE_KEY) as IEnumerable<Company>;
             if (companies == null)
             {
                 ICompanyProvider client = BuildingAPIClient.CompanyProvider;
                 companies = client.Get();
-                HttpRuntime.Cache.Insert(K_COMPANIES_CACHE_KEY, companies);
+                HttpRuntime.Cache.Insert(K_COMPANIES_CACHE_KEY, companies, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
             return companies;
         }
 
         public IEnumerable<EquipmentType> GetEquipmentTypes()
         {
-            IEnumerable<EquipmentType> types = HttpRuntime.Cache.Get(K_EQUIPMENTTYPES_CACHE_KEY) as IEnumerable<EquipmentType>;
+            var types = HttpRuntime.Cache.Get(K_EQUIPMENTTYPES_CACHE_KEY) as IEnumerable<EquipmentType>;
             if (types == null)
             {
                 // The Types API require a customer context. A token requested through the client_credential grant_type
@@ -37,22 +38,20 @@ namespace SummerSunMVC.Services
                 // Let's pick the first in the list...
                 Company c = GetCompanies().FirstOrDefault();
                 types = BuildingAPIClient.TypesClient.GetEquipmentTypes(c);
-                HttpRuntime.Cache.Insert(K_EQUIPMENTTYPES_CACHE_KEY, types);
+                HttpRuntime.Cache.Insert(K_EQUIPMENTTYPES_CACHE_KEY, types, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
             return types;
         }
 
         public IEnumerable<Equipment> GetEquipmentByCompany(string equipmentType, Company company)
         {
-            EquipmentClient client = BuildingAPIClient.EquipmentClient;
             // TO DO
             // Cache locally ?
-            return client.GetEquipmentAndPointRoles(equipmentType, company);
+            return BuildingAPIClient.EquipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
         }
 
-        public IEnumerable<Point> GetPointsInfo(IEnumerable<string> ids, Company c)
+        public IEnumerable<Point> GetPointsSummary(IEnumerable<string> ids, Company c)
         {
-            List<Point> pointList = new List<Point>();
 
             return BuildingAPIClient.EquipmentClient.GetPointsAndSummary(ids, c);
         }

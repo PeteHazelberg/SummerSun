@@ -34,13 +34,13 @@
                 @Html.DisplayFor(modelItem => item.PointRole)
             </td>
             <td>
-                Coming Soon
+                @Html.DisplayFor(modelItem => item.UoM)
             </td>
             <td>
-                Coming Soon
+                @Html.DisplayFor(modelItem => item.LastValue) (Max -> last value cooming soon)
             </td>
             <td>
-                @Html.ActionLink("Details", "Details", new {  /* TO DO set up IDs*/  }, new { @class = "btn btn-info btn-xs" })
+                @Html.ActionLink("Details", "Details", new {  item.PointId  }, new { @class = "btn btn-info btn-xs" })
             </td>
         </tr>
     }
