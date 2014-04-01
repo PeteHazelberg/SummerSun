@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using SummerSunMVC.Filter;
+using System.Web;
 using System.Web.Mvc;
 
 namespace SummerSunMVC
@@ -8,6 +9,7 @@ namespace SummerSunMVC
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new TrackTimeFilter());
         }
     }
 }

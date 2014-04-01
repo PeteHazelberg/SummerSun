@@ -15,6 +15,7 @@ namespace SummerSunMVC
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
+            log4net.Config.XmlConfigurator.Configure();
             // Warm up
             EquipmentClient client = BuildingAPIClient.EquipmentClient;
         }

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Caching;
+using log4net;
+using System.Diagnostics;
 
 namespace SummerSunMVC.Services
 {
@@ -13,6 +15,9 @@ namespace SummerSunMVC.Services
         private const string K_COMPANIES_CACHE_KEY = "Companies";
         private const string K_EQUIPMENTTYPES_CACHE_KEY = "EquipmentTypes";
         private const int _cacheExpirationTimeInMinutes = 30;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(V2BuildingService));
+        private Stopwatch _stopWatch =  new Stopwatch();
+
 
         public IEnumerable<Company> GetCompanies()
         { 
@@ -24,6 +29,7 @@ namespace SummerSunMVC.Services
                 companies = client.Get();
                 HttpRuntime.Cache.Insert(K_COMPANIES_CACHE_KEY, companies, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
+
             return companies;
         }
 
@@ -37,7 +43,10 @@ namespace SummerSunMVC.Services
                 // Need an extra call to get a security token with a customer context
                 // Let's pick the first in the list...
                 Company c = GetCompanies().FirstOrDefault();
+                _stopWatch.Restart();
                 types = BuildingAPIClient.TypesClient.GetEquipmentTypes(c);
+                _stopWatch.Stop();
+                _logger.Debug(string.Format("GetEquipmentTypes executed in {0} ms",  _stopWatch.ElapsedMilliseconds));
                 HttpRuntime.Cache.Insert(K_EQUIPMENTTYPES_CACHE_KEY, types, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
             return types;
@@ -47,13 +56,30 @@ namespace SummerSunMVC.Services
         {
             // TO DO
             // Cache locally ?
-            return BuildingAPIClient.EquipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
+            _stopWatch.Restart();
+            var equipList = BuildingAPIClient.EquipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
+            _stopWatch.Stop();
+            _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} equipment in {2} ms", company.Name, equipList.Count(), _stopWatch.ElapsedMilliseconds));
+            return equipList;
         }
 
         public IEnumerable<Point> GetPointsSummary(IEnumerable<string> ids, Company c)
         {
-
-            return BuildingAPIClient.EquipmentClient.GetPointsAndSummary(ids, c);
+            _stopWatch.Restart();
+            var points = new List<Point>();
+            var requests = new List<IEnumerable<string>>();
+            // Limit of 50 ids per requests.
+            while (ids.Any())
+            {
+                requests.Add(ids.Take(50).ToList());
+                ids = ids.Skip(50).ToList();
+            }
+            foreach (var item in requests)
+                points.AddRange(BuildingAPIClient.EquipmentClient.GetPointsAndSummary(item, c));
+            
+            _stopWatch.Stop();
+            _logger.Debug(string.Format("GetPointsSummary -> {0} found {1} points with {2} requests in {3} ms", c.Name, points.Count(), requests.Count, _stopWatch.ElapsedMilliseconds));
+            return points;
         }
 
     }
