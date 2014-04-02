@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Caching;
-using log4net;
 using System.Diagnostics;
+using NLog;
 
 namespace SummerSunMVC.Services
 {
@@ -15,7 +15,8 @@ namespace SummerSunMVC.Services
         private const string K_COMPANIES_CACHE_KEY = "Companies";
         private const string K_EQUIPMENTTYPES_CACHE_KEY = "EquipmentTypes";
         private const int _cacheExpirationTimeInMinutes = 30;
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(V2BuildingService));
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
+
         private Stopwatch _stopWatch =  new Stopwatch();
 
 
@@ -59,7 +60,7 @@ namespace SummerSunMVC.Services
             _stopWatch.Restart();
             var equipList = BuildingAPIClient.EquipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
             _stopWatch.Stop();
-            _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} equipment in {2} ms", company.Name, equipList.Count(), _stopWatch.ElapsedMilliseconds));
+            _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} {2} in {3} ms", company.Name, equipList.Count(), equipmentType, _stopWatch.ElapsedMilliseconds));
             return equipList;
         }
 

@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,8 +12,7 @@ namespace SummerSunMVC.Filter
     public class TrackTimeFilter : ActionFilterAttribute
     {
         private Stopwatch _stopWatch;
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(TrackTimeFilter));
-
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             _stopWatch = new Stopwatch();
