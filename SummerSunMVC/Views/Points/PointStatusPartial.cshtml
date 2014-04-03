@@ -1,27 +1,27 @@
-﻿@model IEnumerable<SummerSunMVC.Models.PointStatus>
+﻿@model SummerSunMVC.Models.SingleCompanyPointStatusVM
 
 
 <table class="table table-striped table-condensed">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().EquipmentName)
+            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().EquipmentName)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().EquipmentType)
+            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().EquipmentType)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().PointRole)
+            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().PointRole)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().UoM)
+            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().UoM)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.FirstOrDefault().LastValue)
+            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().LastValue)
         </th>
         <th></th>
     </tr>
 
-    @foreach (var item in Model)
+    @foreach (var item in Model.PointsStatus)
     {
         <tr>
             <td>
@@ -40,8 +40,9 @@
                 @Html.DisplayFor(modelItem => item.LastValue) (Max -> last value cooming soon)
             </td>
             <td>
-                @Html.ActionLink("Details", "Details", new {  item.PointId  }, new { @class = "btn btn-info btn-xs" })
+                @Html.ActionLink("Details", "Details", new { Model.SelectedCompany, item.PointId }, new { @class = "btn btn-info btn-xs" })
             </td>
+
         </tr>
     }
 

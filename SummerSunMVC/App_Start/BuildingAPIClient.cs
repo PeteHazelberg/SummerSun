@@ -22,16 +22,15 @@ namespace SummerSunMVC.App_Start
             string clientId = ConfigurationManager.AppSettings["JciClientId"];
             string clientSecret = ConfigurationManager.AppSettings["JciClientSecret"];
             string tokenEndpoint = ConfigurationManager.AppSettings["JciTokenEndpoint"];
-            string companyApiEndpoint = ConfigurationManager.AppSettings["JciCompanyApiEndpoint"];
             string buildingApiEndpoint = ConfigurationManager.AppSettings["JciBuildingApiEndpoint"];
             IWebProxy proxy = WebProxy.GetDefaultProxy();
 
             _tokenProvider = new TokenClient(clientId,clientSecret, tokenEndpoint, proxy);
-            _companyProviderInstance = new CompanyClient(companyApiEndpoint, _tokenProvider);
+            _companyProviderInstance = new CompanyClient(_tokenProvider, buildingApiEndpoint);
             _equipmentClient = new EquipmentClient(_tokenProvider, buildingApiEndpoint);
             _typesClient = new TypesClient(_tokenProvider, buildingApiEndpoint);
 	    }
-        
+            
         public static ICompanyProvider CompanyProvider
         {
             get 

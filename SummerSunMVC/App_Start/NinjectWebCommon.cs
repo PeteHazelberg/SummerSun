@@ -67,7 +67,7 @@ namespace SummerSunMVC.App_Start
             if (ConfigurationManager.AppSettings["APISource"] != "V2API") 
                 kernel.Bind<IBuildingService>().To<MockBuildingService>();
             else
-                kernel.Bind<IBuildingService>().To<V2BuildingService>();
+                kernel.Bind<IBuildingService>().To<V2BuildingService>().InSingletonScope();
 
             //  Register Building API SDK
 /*

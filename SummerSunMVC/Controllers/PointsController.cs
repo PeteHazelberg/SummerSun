@@ -4,6 +4,7 @@ using SummerSunMVC.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Flurl;
 
 namespace SummerSunMVC.Controllers
 {
@@ -65,8 +66,13 @@ namespace SummerSunMVC.Controllers
             return Json(roles, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Details(string pointId)
-        { 
+        public ActionResult Details(SingleCompanyPointStatusVM Model, string pointId)
+        {
+            if (!string.IsNullOrEmpty(pointId))
+            {
+                ViewBag.AccessToken = _buildingService.GetAccessToken(Model.SelectedCompany);
+                ViewBag.pointUrl = _buildingService.APIBaseUrl.AppendPathSegment("building/points").AppendPathSegment(pointId).ToString();
+            }
             return View();
         }
 
