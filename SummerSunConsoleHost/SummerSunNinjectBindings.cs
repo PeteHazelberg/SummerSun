@@ -19,9 +19,6 @@ namespace SummerSun
             var buildingApiEndpoint = Settings.Get("JciBuildingApiEndpoint", "https://api.panoptix.com/building",
                 s => new Uri(s).IsAbsoluteUri,
                 "JciBuildingApiEndpoint in configuration settings should be the base URL of the Building API.");
-            var companyApiEndpoint = Settings.Get("JciCompanyApiEndpoint", "https://api.panoptix.com/companies",
-                s => new Uri(s).IsAbsoluteUri,
-                "JciCompanyApiEndpoint in configuration settings should be the URL of the Companies API."); 
             
             // ReSharper disable once CSharpWarnings::CS0618
             IWebProxy proxy = WebProxy.GetDefaultProxy();
@@ -32,7 +29,7 @@ namespace SummerSun
                 .WithConstructorArgument("endpoint", tokenEndpoint)
                 .WithConstructorArgument("proxy", proxy);
 
-            Bind<ICompanyProvider>().To<CompanyClient>().WithConstructorArgument("endpoint", companyApiEndpoint); ;
+            Bind<ICompanyProvider>().To<CompanyClient>().WithConstructorArgument("endpoint", buildingApiEndpoint); ;
             this.Bind<EquipmentClient>().To<EquipmentClient>().WithConstructorArgument("buildingApiUrl", buildingApiEndpoint);
         }
     }

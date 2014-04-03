@@ -14,7 +14,7 @@ namespace BuildingApi
         public TypesClient(ITokenProvider tokenProvider, string buildingApiUrl)
         {
             this._tokenProvider = tokenProvider;
-            this._apiBaseUrl = buildingApiUrl;
+            this._apiBaseUrl = buildingApiUrl.AppendPathSegment("building").ToString();
         }
 
         public IEnumerable<EquipmentType> GetEquipmentTypes(Company c)
