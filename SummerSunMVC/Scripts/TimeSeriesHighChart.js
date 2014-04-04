@@ -5,6 +5,7 @@ function InitChart() {
     // I need an alternative
 
     // Let's try a promise and make a couple of parallel calls
+    // For now let's call the default samples endpoint without a startdate 
     $.when(getPxResource($('#pointUrl').val()), getPxResource($('#pointUrl').val() + '/samples'))
         .done(function (point, samples) {
             showChart(point[0], samples[0])
@@ -52,7 +53,16 @@ function drawChart(point, data) {
             text: 'Single Point Chart (zoom)'
         },
         xAxis: {
-            type: 'datetime'
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                second: '%Y-%m-%d<br/>%H:%M:%S',
+                minute: '%Y-%m-%d<br/>%H:%M',
+                hour: '%Y-%m-%d<br/>%H:%M',
+                day: '%Y<br/>%m-%d',
+                week: '%Y<br/>%m-%d',
+                month: '%Y-%m',
+                year: '%Y'
+            }
         },
         yAxis: {
             title: {
