@@ -1,0 +1,80 @@
+﻿@model SummerSunMVC.Models.EquipmentReportViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<link href="@Url.Content("~/content/css/jquery.treegrid.css")"
+      rel="stylesheet"
+      type="text/css" />
+
+<h2>Single Customer Point Dashboard</h2>
+<br />
+@using (Html.BeginForm("Index", "Equipment", FormMethod.Get))
+{
+    <p>
+        Company:@Html.DropDownListFor(x => x.SelectedCompany,
+            new SelectList(Model.Companies, "Value", "Text"), "Select Company")
+        Equipment:@Html.DropDownListFor(x => x.SelectedEquipmentType,
+            new SelectList(Model.EquipmentTypes, "Value", "Text"), "Select Type")
+
+        <input type="submit" value="Show" />
+    </p>
+}
+
+<br />
+
+<table class="tree table table-striped table-condensed">
+    @{int uniqueId = 0;}
+    @{int parentIndex = 0;}
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().EquipmentName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().PointRole)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().UoM)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().LastValue)
+        </th>
+    </tr>
+
+    @foreach (var e in Model.Equipment)
+    {
+        uniqueId++;
+        parentIndex = uniqueId;
+        <tr class="treegrid-@(uniqueId)">
+            <td>@Html.DisplayFor(modelItem => e.EquipmentName) </td>
+        </tr>
+        foreach (var pt in e.PointsStatus)
+        {
+            uniqueId++;
+            <tr class="treegrid-@(uniqueId) treegrid-parent-@(parentIndex)">
+                <td>@Html.DisplayFor(item => pt.PointRole) </td>
+                <td>@Html.DisplayFor(item => pt.PointRole) </td>
+                <td>@Html.DisplayFor(item => pt.UoM) </td>
+                <td>@Html.DisplayFor(item => pt.LastValue) </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", "Points",new { Model.SelectedCompany, pt.PointId }, new { @class = "btn btn-info btn-xs" })
+                </td>
+            </tr>
+        }
+    }
+
+
+</table>
+
+@section scripts {
+    <script src="@Url.Content("~/content/js/jquery.treegrid.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/content/js/jquery.treegrid.bootstrap3.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.tree').treegrid();
+        });
+    </script>
+
+}

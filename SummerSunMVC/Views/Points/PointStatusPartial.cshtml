@@ -1,49 +1,51 @@
-﻿@model SummerSunMVC.Models.SingleCompanyPointStatusVM
-
+﻿@model SummerSunMVC.Models.EquipmentPointRoleViewModel
 
 <table class="table table-striped table-condensed">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().EquipmentName)
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().EquipmentName)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().EquipmentType)
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().EquipmentType)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().PointRole)
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().PointRole)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().UoM)
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().UoM)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.PointsStatus.FirstOrDefault().LastValue)
+            @Html.DisplayNameFor(model => model.Equipment.FirstOrDefault().PointsStatus.FirstOrDefault().LastValue)
         </th>
         <th></th>
     </tr>
 
-    @foreach (var item in Model.PointsStatus)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.EquipmentName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EquipmentType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PointRole)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UoM)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastValue) (Max -> last value cooming soon)
-            </td>
-            <td>
-                @Html.ActionLink("Details", "Details", new { Model.SelectedCompany, item.PointId }, new { @class = "btn btn-info btn-xs" })
-            </td>
+    @if (Model.Equipment.FirstOrDefault() != null)
+    { 
+        foreach (var item in Model.Equipment.FirstOrDefault().PointsStatus)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => Model.Equipment.FirstOrDefault().EquipmentName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => Model.Equipment.FirstOrDefault().EquipmentType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PointRole)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UoM)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastValue) (Max -> last value cooming soon)
+                </td>
+                <td>
+                    @Html.ActionLink("Details", "Details", new { Model.SelectedCompany, item.PointId }, new { @class = "btn btn-info btn-xs" })
+                </td>
 
-        </tr>
+            </tr>
+        }
     }
 
 </table>

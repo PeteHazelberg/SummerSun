@@ -44,7 +44,6 @@ namespace SummerSunMVC.Services
             var companies = HttpRuntime.Cache.Get(K_COMPANIES_CACHE_KEY) as IEnumerable<Company>;
             if (companies == null)
             {
-                ICompanyProvider client = BuildingAPIClient.CompanyProvider;
                 var token = _tokenProvider.Get();
                 companies = HttpHelper.Get<Company[]>(_equipmentClient.APIBaseUrl.AppendPathSegment("companies").ToString(), token);
 
