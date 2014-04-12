@@ -43,6 +43,7 @@ namespace SummerSunMVC.Models
         public string UoM { get; set; }
         [Display(Name = "Last value")]
         public string LastValue { get; set; }
+        public DateTime TimeStampLastValue { get; set; }
     }
 
 }

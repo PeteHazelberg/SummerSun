@@ -98,7 +98,13 @@ namespace SummerSunMVC.Controllers
                     if (equip.Value.ContainsKey(item.Id))
                     {
                         equip.Value[item.Id].UoM = item.Units.Id ?? "-";
-                        equip.Value[item.Id].LastValue = string.Format("{0:0.##}",item.SampleSummary.MaxValue);
+                        // At this point GetPointsSummary does not return the nested Newest field
+                        // To be improved
+                        if (item.SampleSummary.Newest != null)
+                        {
+                            equip.Value[item.Id].LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.val);
+                            equip.Value[item.Id].TimeStampLastValue = DateTime.ParseExact(item.SampleSummary.Newest.ts, "u", System.Globalization.CultureInfo.InvariantCulture);
+                        }
                     }
                 }
             }

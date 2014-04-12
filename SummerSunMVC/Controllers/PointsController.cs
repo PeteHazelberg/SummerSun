@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Flurl;
+using System;
 
 namespace SummerSunMVC.Controllers
 {
@@ -120,9 +121,13 @@ namespace SummerSunMVC.Controllers
                 if (viewModelMap.ContainsKey(item.Id) && viewModelMap[item.Id].PointsStatus.Count() > 0)
                 {
                     viewModelMap[item.Id].PointsStatus.First().UoM = item.Units.Id ?? item.States.Id;
-                    // TO DO
-                    // To be replaced with last value
-                    viewModelMap[item.Id].PointsStatus.First().LastValue = string.Format("{0:0.##}",item.SampleSummary.MaxValue);
+                    // At this point GetPointsSummary does not return the nested Newest field
+                    // To be improved
+                    if (item.SampleSummary.Newest != null)
+                    {
+                        viewModelMap[item.Id].PointsStatus.First().LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.val);
+                        viewModelMap[item.Id].PointsStatus.First().TimeStampLastValue = DateTime.ParseExact(item.SampleSummary.Newest.ts, "u", System.Globalization.CultureInfo.InvariantCulture);
+                    }
                 }
             }
 
