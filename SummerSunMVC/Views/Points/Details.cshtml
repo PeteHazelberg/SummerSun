@@ -1,10 +1,22 @@
-﻿@model SummerSunMVC.Models.PointStatus
+﻿@model SummerSunMVC.Models.PointViewModel
 
 @{
     ViewBag.Title = "PointDetailView";
 }
+<br />
+<p> Maybe a D3.JS chart ? Let's start with Highchart. Wait a couple of seconds...</p>
 
-<h2>Coming SOON!!</h2>
+<div id="chartContainer" style="width:100%; height:400px;"></div>
+<input type="hidden" value="@ViewBag.AccessToken" id="AccessToken" />
+<input type="hidden" value="@ViewBag.pointUrl" id="pointUrl" />
 
+@section scripts {
 
-<p> Maybe a D3.JS chart ?</p>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+@Scripts.Render("~/Scripts/TimeSeriesHighChart.js")
+
+<script>
+    InitChart();
+</script>
+
+}

@@ -4,6 +4,8 @@ using SummerSunMVC.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Flurl;
+using System;
 
 namespace SummerSunMVC.Controllers
 {
@@ -18,7 +20,7 @@ namespace SummerSunMVC.Controllers
 
         public ActionResult Index(string selectedCompany, string selectedEquipmentType, string selectedRoleType)
         {
-            var viewModel = new SingleCompanyPointStatusVM();
+            var viewModel = new EquipmentPointRoleViewModel();
             
             // Retrieve Companies
             var companies = _buildingService.GetCompanies().ToList();
@@ -50,7 +52,7 @@ namespace SummerSunMVC.Controllers
             
             // Retrieve data for the partial view
             var company = companies.FirstOrDefault(c => c.Id == selectedCompany);
-            viewModel.PointsStatus = _retrievePointsStatus(company, selectedEquipmentType, selectedRoleType);
+            viewModel.Equipment = _retrievePointsStatus(company, selectedEquipmentType, selectedRoleType);
 
             return View(viewModel);
         }
@@ -65,22 +67,27 @@ namespace SummerSunMVC.Controllers
             return Json(roles, JsonRequestBehavior.AllowGet);
         }
 
-        public ActionResult Details(string pointId)
-        { 
+        public ActionResult Details(EquipmentPointRoleViewModel Model, string pointId)
+        {
+            if (!string.IsNullOrEmpty(pointId))
+            {
+                ViewBag.AccessToken = _buildingService.GetAccessToken(Model.SelectedCompany);
+                ViewBag.pointUrl = _buildingService.APIBaseUrl.AppendPathSegment("building/points").AppendPathSegment(pointId).ToString();
+            }
             return View();
         }
 
-        private List<PointStatus> _retrievePointsStatus(Company company, string type, string roleType)
+        private List<EquipmentAndPointsViewModel> _retrievePointsStatus(Company company, string type, string roleType)
         {
             if (company == null)
             {
-                return new List<PointStatus>();
+                return new List<EquipmentAndPointsViewModel>();
             }
 
             // TO DO
             // Let's assume to build a table with a single point per row
             var equipList = _buildingService.GetEquipmentByCompany(type, company);
-            var viewModelMap = new Dictionary<string, PointStatus>();
+            var viewModelMap = new Dictionary<string, EquipmentAndPointsViewModel>();
 
             foreach (var item in equipList)
             {
@@ -89,32 +96,38 @@ namespace SummerSunMVC.Controllers
                 // Not sure if we need them or not
                 if (pt != null)
                 {
-                    var model = new PointStatus
+                    var model = new EquipmentAndPointsViewModel
                     {
                         EquipmentName = item.Name,
                         EquipmentId = item.Id,
                         EquipmentType = item.Type.Id,
-                        PointRole = pt.Type.Id,
-                        PointId = pt.Point.Id
                     };
-                    viewModelMap.Add(model.PointId, model);
+                    var list = new List<PointViewModel>();
+                    var m = new PointViewModel() { PointRole = pt.Type.Id, PointId = pt.Point.Id };
+                    list.Add(m);
+                    model.PointsStatus = list;
+                    viewModelMap.Add(model.PointsStatus.First().PointId, model);
                 }
             }
 
             if (viewModelMap.Count == 0)
             {
-                return new List<PointStatus>();
+                return new List<EquipmentAndPointsViewModel>();
             }
 
             var pointsInfo = _buildingService.GetPointsSummary(viewModelMap.Keys, company);
             foreach (var item in pointsInfo)
             {
-                if (viewModelMap.ContainsKey(item.Id))
+                if (viewModelMap.ContainsKey(item.Id) && viewModelMap[item.Id].PointsStatus.Count() > 0)
                 {
-                    viewModelMap[item.Id].UoM = item.Units.Id ?? item.States.Id;
-                    // TO DO
-                    // To be replaced with last value
-                    viewModelMap[item.Id].LastValue = item.SampleSummary.MaxValue.ToString();
+                    viewModelMap[item.Id].PointsStatus.First().UoM = item.Units.Id ?? item.States.Id;
+                    // At this point GetPointsSummary does not return the nested Newest field
+                    // To be improved
+                    if (item.SampleSummary.Newest != null)
+                    {
+                        viewModelMap[item.Id].PointsStatus.First().LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.val);
+                        viewModelMap[item.Id].PointsStatus.First().TimeStampLastValue = DateTime.ParseExact(item.SampleSummary.Newest.ts, "u", System.Globalization.CultureInfo.InvariantCulture);
+                    }
                 }
             }
 

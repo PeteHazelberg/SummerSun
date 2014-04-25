@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Flurl;
 
 namespace BuildingApi
 {
@@ -7,7 +8,7 @@ namespace BuildingApi
         private readonly string endpoint;
         private readonly ITokenProvider tokenProvider;
 
-        public CompanyClient(string endpoint, ITokenProvider tokenProvider)
+        public CompanyClient(ITokenProvider tokenProvider,string endpoint)
         {
             this.endpoint = endpoint;
             this.tokenProvider = tokenProvider;
@@ -17,7 +18,7 @@ namespace BuildingApi
         public IEnumerable<Company> Get(string companyId = null)
         {
             var token = tokenProvider.Get();
-            return HttpHelper.Get<Company[]>(endpoint, token);
+            return HttpHelper.Get<Company[]>(endpoint.AppendPathSegment("companies").ToString(), token);
         }
     }
 }

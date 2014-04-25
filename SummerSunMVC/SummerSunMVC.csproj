@@ -40,6 +40,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Flurl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Flurl.0.2.1\lib\portable-win+net40+sl40+wp+Xbox40\Flurl.dll</HintPath>
+    </Reference>
     <Reference Include="LogentriesCore">
       <HintPath>..\packages\logentries.core.2.4.3\lib\net40\LogentriesCore.dll</HintPath>
     </Reference>
@@ -71,9 +75,9 @@
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -180,12 +184,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="App_Start\BuildingAPIClient.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\EquipmentController.cs" />
     <Compile Include="Controllers\MultiCompanyController.cs" />
     <Compile Include="Controllers\PointsController.cs" />
     <Compile Include="Filter\TrackTimeFilter.cs" />
@@ -194,7 +198,7 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
-    <Compile Include="Models\SingleCompanyPointStatusVM.cs" />
+    <Compile Include="Models\EquipmentReportViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IBuildingService.cs" />
     <Compile Include="Services\MockBuildingService.cs" />
@@ -204,6 +208,11 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\css\jquery.treegrid.css" />
+    <Content Include="Content\js\jquery.cookie.js" />
+    <Content Include="Content\js\jquery.treegrid.bootstrap2.js" />
+    <Content Include="Content\js\jquery.treegrid.bootstrap3.js" />
+    <Content Include="Content\js\jquery.treegrid.js" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -223,6 +232,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\TimeSeriesHighChart.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -252,6 +262,7 @@
     <Content Include="Views\Points\PointStatusPartial.cshtml" />
     <Content Include="Views\Points\Details.cshtml" />
     <Content Include="Views\MultiCompany\Index.cshtml" />
+    <Content Include="Views\Equipment\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

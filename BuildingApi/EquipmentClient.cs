@@ -7,9 +7,18 @@ namespace BuildingApi
 {
     public class EquipmentClient
     {
+        private readonly string apiBaseUrl;
+        private readonly ITokenProvider tokens;
+        public EquipmentClient(ITokenProvider tokenProvider, string buildingApiUrl)
+        {
+            this.tokens = tokenProvider;
+            this.apiBaseUrl = buildingApiUrl;
+        }
+
+        public string APIBaseUrl { get { return apiBaseUrl; } }
         public IEnumerable<Equipment> GetEquipmentAndPointRoles(string equipmentType, Company company, int offset = 0, int max = 250)
         {
-            var url = apiBaseUrl.AppendPathSegment("equipment").SetQueryParams(new
+            var url = apiBaseUrl.AppendPathSegment("building/equipment").SetQueryParams(new
             {
                 type = equipmentType,
                 _expand = "pointRoles",
@@ -22,7 +31,7 @@ namespace BuildingApi
 
         public IEnumerable<Point> GetPointsAndSummary(IEnumerable<string> pointIds, Company company)
         {
-            var url = apiBaseUrl.AppendPathSegment("points").SetQueryParams(new
+            var url = apiBaseUrl.AppendPathSegment("building/points").SetQueryParams(new
             {
                 id = string.Join(",", pointIds),
                 _expand = "sampleSummary",
@@ -32,14 +41,5 @@ namespace BuildingApi
             var resp = HttpHelper.Get<Page<Point>>(company, url, tokens);
             return (resp == null || resp.Items == null) ? new List<Point>() : resp.Items;            
         }
-
-        public EquipmentClient(ITokenProvider tokenProvider, string buildingApiUrl)
-        {
-            this.tokens = tokenProvider;
-            this.apiBaseUrl = buildingApiUrl;
-        }
-
-        private readonly string apiBaseUrl;
-        private readonly ITokenProvider tokens;
     }
 }

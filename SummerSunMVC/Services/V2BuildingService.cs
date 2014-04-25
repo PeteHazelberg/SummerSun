@@ -7,6 +7,9 @@ using System.Web;
 using System.Web.Caching;
 using System.Diagnostics;
 using NLog;
+using System.Configuration;
+using System.Net;
+using Flurl;
 
 namespace SummerSunMVC.Services
 {
@@ -16,9 +19,24 @@ namespace SummerSunMVC.Services
         private const string K_EQUIPMENTTYPES_CACHE_KEY = "EquipmentTypes";
         private const int _cacheExpirationTimeInMinutes = 30;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
+        private ITokenProvider _tokenProvider = null;
+        private EquipmentClient _equipmentClient = null;
 
         private Stopwatch _stopWatch =  new Stopwatch();
 
+        public V2BuildingService()
+        {
+            string clientId = ConfigurationManager.AppSettings["JciClientId"];
+            string clientSecret = ConfigurationManager.AppSettings["JciClientSecret"];
+            string tokenEndpoint = ConfigurationManager.AppSettings["JciTokenEndpoint"];
+            string buildingApiEndpoint = ConfigurationManager.AppSettings["JciBuildingApiEndpoint"];
+            IWebProxy proxy = WebProxy.GetDefaultProxy();
+
+            _tokenProvider = new TokenClient(clientId, clientSecret, tokenEndpoint, proxy);
+            _equipmentClient = new EquipmentClient(_tokenProvider, buildingApiEndpoint);
+        }
+
+        public string APIBaseUrl { get { return _equipmentClient.APIBaseUrl; } }
 
         public IEnumerable<Company> GetCompanies()
         { 
@@ -26,12 +44,27 @@ namespace SummerSunMVC.Services
             var companies = HttpRuntime.Cache.Get(K_COMPANIES_CACHE_KEY) as IEnumerable<Company>;
             if (companies == null)
             {
-                ICompanyProvider client = BuildingAPIClient.CompanyProvider;
-                companies = client.Get();
+                var token = _tokenProvider.Get();
+                companies = HttpHelper.Get<Company[]>(_equipmentClient.APIBaseUrl.AppendPathSegment("companies").ToString(), token);
+
                 HttpRuntime.Cache.Insert(K_COMPANIES_CACHE_KEY, companies, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
 
             return companies;
+        }
+
+        public string GetAccessToken(string companyId)
+        {
+            var company = GetCompanies().FirstOrDefault(c => c.Id == companyId);
+            if (company == null)
+                return string.Empty;
+            else
+                return GetAccessToken(company);
+        }
+
+        public string GetAccessToken(Company c)
+        {
+            return _tokenProvider.Get(c).AccessToken;
         }
 
         public IEnumerable<EquipmentType> GetEquipmentTypes()
@@ -40,14 +73,17 @@ namespace SummerSunMVC.Services
             if (types == null)
             {
                 // The Types API require a customer context. A token requested through the client_credential grant_type
-                // is not enough. It needs to be fixed on the API side
-                // Need an extra call to get a security token with a customer context
+                // is not enough. 
                 // Let's pick the first in the list...
                 Company c = GetCompanies().FirstOrDefault();
                 _stopWatch.Restart();
-                types = BuildingAPIClient.TypesClient.GetEquipmentTypes(c);
+                var url = _equipmentClient.APIBaseUrl.AppendPathSegment("building/types/Equipment");
+                var resp = HttpHelper.Get<Page<EquipmentType>>(url, _tokenProvider.Get(c));
+                 types = (resp == null || resp.Items == null) ? new List<EquipmentType>() : resp.Items;
+
                 _stopWatch.Stop();
                 _logger.Debug(string.Format("GetEquipmentTypes executed in {0} ms",  _stopWatch.ElapsedMilliseconds));
+
                 HttpRuntime.Cache.Insert(K_EQUIPMENTTYPES_CACHE_KEY, types, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
             return types;
@@ -58,7 +94,7 @@ namespace SummerSunMVC.Services
             // TO DO
             // Cache locally ?
             _stopWatch.Restart();
-            var equipList = BuildingAPIClient.EquipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
+            var equipList = _equipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
             _stopWatch.Stop();
             _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} {2} in {3} ms", company.Name, equipList.Count(), equipmentType, _stopWatch.ElapsedMilliseconds));
             return equipList;
@@ -76,7 +112,7 @@ namespace SummerSunMVC.Services
                 ids = ids.Skip(50).ToList();
             }
             foreach (var item in requests)
-                points.AddRange(BuildingAPIClient.EquipmentClient.GetPointsAndSummary(item, c));
+                points.AddRange(_equipmentClient.GetPointsAndSummary(item, c));
             
             _stopWatch.Stop();
             _logger.Debug(string.Format("GetPointsSummary -> {0} found {1} points with {2} requests in {3} ms", c.Name, points.Count(), requests.Count, _stopWatch.ElapsedMilliseconds));

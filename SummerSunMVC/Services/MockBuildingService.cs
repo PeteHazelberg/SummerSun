@@ -22,6 +22,18 @@ namespace SummerSunMVC.Services
             return companies;
         }
 
+        public string APIBaseUrl { get { return string.Empty; } }
+
+        public string GetAccessToken(string companyName)
+        {
+            return string.Empty;
+        }
+
+        public string GetAccessToken(Company c)
+        {
+            return string.Empty;
+        }
+
         public IEnumerable<EquipmentType> GetEquipmentTypes()
         { 
             List<EquipmentType> types = new List<EquipmentType>();
