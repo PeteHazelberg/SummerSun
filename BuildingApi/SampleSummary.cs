@@ -7,5 +7,6 @@
         public double MinValue { get; set; }
         public string OldestSample { get; set; }
         public string NewestSample { get; set; }
+        public Sample Newest { get; set; }
     }
 }

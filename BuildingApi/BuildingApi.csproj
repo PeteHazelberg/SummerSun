@@ -67,6 +67,7 @@
     <Compile Include="Page.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="PointRole.cs" />
+    <Compile Include="Sample.cs" />
     <Compile Include="SampleSummary.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="TokenClient.cs" />
