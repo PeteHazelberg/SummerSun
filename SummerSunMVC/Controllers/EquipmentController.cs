@@ -1,10 +1,8 @@
 ﻿using BuildingApi;
 using SummerSunMVC.Models;
 using SummerSunMVC.Services;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace SummerSunMVC.Controllers
@@ -60,7 +58,7 @@ namespace SummerSunMVC.Controllers
                 return eqListVM;
             }
 
-            var equipList = _buildingService.GetEquipmentByCompany(type, company);
+            var equipList = _buildingService.GetEquipmentByCompany(type, company).ToList();
             var equip2PointsMap = new Dictionary<string,Dictionary<string, PointViewModel>>();
 
             foreach (var item in equipList)
@@ -68,14 +66,14 @@ namespace SummerSunMVC.Controllers
                 var pointsMap = new Dictionary<string, PointViewModel>();
                 // Does the equipment API support paging ??
                 foreach (var ptr in item.PointRoles.Items)
-	            {
-		            var model = new PointViewModel
+                {
+                    var model = new PointViewModel
                     {
                         PointRole = ptr.Type.Id,
                         PointId = ptr.Point.Id
                     };
                     pointsMap.Add(ptr.Point.Id, model);
-	            }
+                }
                 equip2PointsMap.Add(item.Id, pointsMap);
             }
 
@@ -88,7 +86,7 @@ namespace SummerSunMVC.Controllers
             foreach (var equip in equip2PointsMap)
                 pointIdsList.AddRange(equip.Value.Keys.ToList());
             
-            var pointsInfo = _buildingService.GetPointsSummary(pointIdsList, company);
+            var pointsInfo = _buildingService.GetPointsSummary(pointIdsList, company).ToList();
             // ?? Linq here ??
             foreach (var equip in equip2PointsMap)
             {
@@ -102,8 +100,8 @@ namespace SummerSunMVC.Controllers
                         // To be improved
                         if (item.SampleSummary.Newest != null)
                         {
-                            equip.Value[item.Id].LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.val);
-                            equip.Value[item.Id].TimeStampLastValue = DateTime.ParseExact(item.SampleSummary.Newest.ts, "u", System.Globalization.CultureInfo.InvariantCulture);
+                            equip.Value[item.Id].LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.Value);
+                            equip.Value[item.Id].TimeStampLastValue = item.SampleSummary.Newest.Timestamp;
                         }
                     }
                 }
@@ -112,7 +110,7 @@ namespace SummerSunMVC.Controllers
             foreach (var item in equipList)
             {
                 // Skip equipment without points
-                if (item.PointRoles.Items.Count() > 0)
+                if (item.PointRoles.Items.Any())
                 {
                     var eq = new EquipmentAndPointsViewModel()
                     {
@@ -128,5 +126,5 @@ namespace SummerSunMVC.Controllers
             return eqListVM;
         }
 
-	}
+    }
 }

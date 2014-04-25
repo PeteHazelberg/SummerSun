@@ -1,11 +1,10 @@
 ﻿using BuildingApi;
+using Flurl;
 using SummerSunMVC.Models;
 using SummerSunMVC.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using Flurl;
-using System;
 
 namespace SummerSunMVC.Controllers
 {
@@ -125,8 +124,8 @@ namespace SummerSunMVC.Controllers
                     // To be improved
                     if (item.SampleSummary.Newest != null)
                     {
-                        viewModelMap[item.Id].PointsStatus.First().LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.val);
-                        viewModelMap[item.Id].PointsStatus.First().TimeStampLastValue = DateTime.ParseExact(item.SampleSummary.Newest.ts, "u", System.Globalization.CultureInfo.InvariantCulture);
+                        viewModelMap[item.Id].PointsStatus.First().LastValue = string.Format("{0:0.##}", item.SampleSummary.Newest.Value);
+                        viewModelMap[item.Id].PointsStatus.First().TimeStampLastValue = item.SampleSummary.Newest.Timestamp;
                     }
                 }
             }
