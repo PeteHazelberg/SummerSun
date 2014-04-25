@@ -10,6 +10,7 @@ namespace BuildingApi
         public EntityLink Units { get; set; }
         public EntityLink States { get; set; }
         public SampleSummary SampleSummary { get; set; }
+        public Link Attributes { get; set; }
 
         public override bool Equals(object obj)
         {
