@@ -82,7 +82,7 @@ namespace BuildingApi
                         if (company != null && company.Id != null)
                         {
                             contentList.Add(new KeyValuePair<string, string>("jci_company_id", company.Id));
-                            contentList.Add(new KeyValuePair<string, string>("scope", "panoptix.read panoptix.write panoptix.manage panoptix.delete"));
+                            contentList.Add(new KeyValuePair<string, string>("scope", "panoptix.read"));
                         }
                         var content = new FormUrlEncodedContent(contentList);
 
