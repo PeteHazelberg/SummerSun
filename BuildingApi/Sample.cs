@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace BuildingApi
@@ -9,6 +10,6 @@ namespace BuildingApi
         public double Value { get; set; }
         [JsonProperty(PropertyName = "ts")]
         public DateTime Timestamp { get; set; }
-        public string Flags { get; set; }
+        public IEnumerable<string> Flags { get; set; }
     }
 }
