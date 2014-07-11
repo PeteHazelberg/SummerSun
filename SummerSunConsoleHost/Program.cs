@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,8 +15,8 @@ namespace SummerSun
         static void Main(string[] args)
         {
             string companySearch = "";
-            string equipmentType = "Chiller";
-            string pointRoleType = "ChillerStatus";
+            string equipmentType = "";
+            string pointRoleType = "";
             int pageSize = 10;
 
             var commandLineParams = new OptionSet()
