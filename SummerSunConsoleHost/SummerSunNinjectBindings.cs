@@ -16,7 +16,7 @@ namespace SummerSun
             var tokenEndpoint = Settings.Get("JciTokenEndpoint", "https://identity.johnsoncontrols.com/issue/oauth2/token",
                 s => new Uri(s).IsAbsoluteUri,
                 "JciTokenEndpoint in configuration settings should be the URL where JCI's tokens are issued from.");
-            var buildingApiEndpoint = Settings.Get("JciBuildingApiEndpoint", "https://api.panoptix.com/building",
+            var buildingApiEndpoint = Settings.Get("JciBuildingApiEndpoint", "https://api.panoptix.com/",
                 s => new Uri(s).IsAbsoluteUri,
                 "JciBuildingApiEndpoint in configuration settings should be the base URL of the Building API.");
             
@@ -31,6 +31,7 @@ namespace SummerSun
 
             Bind<ICompanyProvider>().To<CompanyClient>().WithConstructorArgument("endpoint", buildingApiEndpoint); ;
             this.Bind<EquipmentClient>().To<EquipmentClient>().WithConstructorArgument("buildingApiUrl", buildingApiEndpoint);
+            this.Bind<ApiClient>().To<ApiClient>().WithConstructorArgument("buildingApiUrl", buildingApiEndpoint);
         }
     }
 }

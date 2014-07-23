@@ -7,6 +7,7 @@ using BuildingApi;
 using Mono.Options;
 using Ninject;
 using Humanizer;
+using Flurl;
 
 namespace SummerSun
 {
@@ -68,7 +69,9 @@ namespace SummerSun
                     }
                 }
             }
-            
+
+            Point point = null;
+
             IDictionary<string, Point> role2Point = new Dictionary<string, Point>();
             if (equip2Roles.Any())
             {
@@ -111,9 +114,10 @@ namespace SummerSun
                     {
                         if (role2Point.ContainsKey(role.Id))
                         {
-                            var pt = role2Point[role.Id];
-                            Console.WriteLine(tablePattern, FormatEquipmentName(equip[eId]), FormatRoleTypeName(role), 
-                                ExtractNewestVal(pt), ExtractUnits(pt), ExtractNewestTimeStamp(pt));
+                            point = role2Point[role.Id];
+                            var fqr = point.GetAttribute("source", "id");
+                            Console.WriteLine(tablePattern + " {5}", FormatEquipmentName(equip[eId]), FormatRoleTypeName(role),
+                                ExtractNewestVal(point), ExtractUnits(point), ExtractNewestTimeStamp(point), fqr);
                         }
                         else
                         {
@@ -125,6 +129,17 @@ namespace SummerSun
                     Console.WriteLine(tablePattern, FormatEquipmentName(equip[eId]), "  ---", string.Empty, string.Empty, string.Empty);
             }
             DrawTableLine(tablePattern);
+
+            //var api = kernel.Get<ApiClient>();
+            //var url = api.BaseUrl.AppendPathSegments(new[] { "building", "point", point.Id, "samples" }).SetQueryParams(new 
+            //{
+            //    _startTime = DateTime.UtcNow.AddDays(-1).ToString("s") + "Z",
+            //    _interval = "auto"
+            //});
+            //var samps = api.Get<Sample>(url, company);
+            //foreach (var samp in samps)
+            //    Console.WriteLine(samp.Timestamp);
+
             Console.ReadKey();
         }
 
@@ -194,7 +209,7 @@ namespace SummerSun
                 Console.WriteLine("Choose a company to view:");
                 foreach(var num2Comp in compIndex)
                 {
-                    Console.WriteLine("{0,4}  {1}", num2Comp.Key, num2Comp.Value.Name);
+                    Console.WriteLine("{0,4}  {1,-40}    Id={2}", num2Comp.Key, num2Comp.Value.Name, num2Comp.Value.Id);
                 }
                 Console.Write("Enter a company number:");
                 input = Console.ReadLine();
@@ -203,5 +218,24 @@ namespace SummerSun
         }
 
         private const int MaxPointIdsInQueryString = 50;
+    }
+
+    public class ApiClient
+    {
+        private readonly string baseUrl;
+        private readonly ITokenProvider tokens;
+        public ApiClient(ITokenProvider tokenProvider, string buildingApiUrl)
+        {
+            this.tokens = tokenProvider;
+            this.baseUrl = buildingApiUrl;
+        }
+
+        public string BaseUrl { get { return baseUrl; } }
+
+        public IEnumerable<T> Get<T>(Url url, Company company, int offset = 0, int limit = 200)
+        {
+            var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), tokens);
+            return (resp == null || resp.Items == null) ? new List<T>() : resp.Items;
+        }
     }
 }
