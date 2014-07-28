@@ -32,7 +32,7 @@ namespace SummerSunMVC.Services
             string buildingApiEndpoint = ConfigurationManager.AppSettings["JciBuildingApiEndpoint"];
             IWebProxy proxy = WebProxy.GetDefaultProxy();
 
-            _tokenProvider = new TokenClient(clientId, clientSecret, tokenEndpoint, proxy);
+            _tokenProvider = new ClientCredentialsTokenClient(clientId, clientSecret, tokenEndpoint, proxy);
             _api = new ApiClient(_tokenProvider, buildingApiEndpoint);
         }
 

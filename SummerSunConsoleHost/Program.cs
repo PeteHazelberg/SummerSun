@@ -160,8 +160,8 @@ namespace SummerSun
         }
         private static string ExtractNewestVal(Point pt)
         {
-            if (pt == null || pt.SampleSummary == null || pt.SampleSummary.Newest == null) {  return string.Empty; }
-            return pt.SampleSummary.Newest.Value.ToString("F1");
+            if (pt == null || pt.SampleSummary == null || pt.SampleSummary.Newest == null || !pt.SampleSummary.Newest.Value.HasValue) {  return string.Empty; }
+            return pt.SampleSummary.Newest.Value.Value.ToString("F1");
         }
         private static string ExtractUnits(Point pt)
         {

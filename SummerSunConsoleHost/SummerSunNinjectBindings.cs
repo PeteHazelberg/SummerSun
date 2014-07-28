@@ -23,7 +23,7 @@ namespace SummerSun
             // ReSharper disable once CSharpWarnings::CS0618
             IWebProxy proxy = WebProxy.GetDefaultProxy();
 
-            Bind<ITokenProvider>().To<TokenClient>()
+            Bind<ITokenProvider>().To<ClientCredentialsTokenClient>()
                 .WithConstructorArgument("id", clientId)
                 .WithConstructorArgument("secret", clientSecret)
                 .WithConstructorArgument("endpoint", tokenEndpoint)
