@@ -7,8 +7,8 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial release.</releaseNotes>
+    <releaseNotes>Merged in Kyle's additions for authentication and POST support</releaseNotes>
     <copyright>Copyright 2014</copyright>
-	<tags>http web api client</tags>
+	<tags>http web building api jci</tags>
   </metadata>
 </package>

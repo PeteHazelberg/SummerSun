@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -61,7 +62,37 @@ namespace BuildingApi
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
 
-                return client.GetAsync(url).Result;
+                var sw = new Stopwatch();
+                sw.Start();
+                var result =  client.GetAsync(url).Result;
+                Log.DebugFormat("Result={0} Action='GET' Url='{1}' TimeTakenMs='{2}'", (Int32)result.StatusCode, url, sw.ElapsedMilliseconds);
+                return result;
+            }
+        }
+
+        public static HttpResponseMessage Post(string url, Token token, Object payload)
+        {
+            var content = new StringContent(JsonConvert.SerializeObject(payload));
+
+            var handler = new HttpClientHandler
+            {
+                Proxy = token.Proxy
+            };
+
+            if (handler.SupportsAutomaticDecompression)
+            {
+                handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            }
+
+            using (var client = new HttpClient(handler))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+                var sw = new Stopwatch();
+                sw.Start();
+                var result = client.PostAsync(url, content).Result;
+                Log.DebugFormat("Result={0} Action='POST' Url='{1}' TimeTakenMs='{2}'", (Int32)result.StatusCode, url, sw.ElapsedMilliseconds);
+                return result;
             }
         }
 

@@ -46,6 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiClient.cs" />
+    <Compile Include="AuditInfo.cs" />
+    <Compile Include="ClientCredentialsTokenClient.cs" />
     <Compile Include="Company.cs" />
     <Compile Include="EntityLink.cs" />
     <Compile Include="Equipment.cs" />
@@ -55,15 +57,20 @@
     <Compile Include="ITokenProvider.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="Page.cs" />
+    <Compile Include="PasswordCredentials.cs" />
+    <Compile Include="PasswordTokenClient.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="PointRole.cs" />
+    <Compile Include="RawSamplesFile.cs" />
     <Compile Include="Sample.cs" />
+    <Compile Include="SampleBatch.cs" />
     <Compile Include="SampleSummary.cs" />
     <Compile Include="Token.cs" />
-    <Compile Include="TokenClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TokenClientBase.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BuildingApi.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
