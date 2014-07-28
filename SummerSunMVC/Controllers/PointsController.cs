@@ -117,9 +117,9 @@ namespace SummerSunMVC.Controllers
             var pointsInfo = _buildingService.GetPointsSummary(viewModelMap.Keys, company);
             foreach (var item in pointsInfo)
             {
-                if (viewModelMap.ContainsKey(item.Id) && viewModelMap[item.Id].PointsStatus.Count() > 0)
+                if (viewModelMap.ContainsKey(item.Id) && viewModelMap[item.Id].PointsStatus.Any())
                 {
-                    viewModelMap[item.Id].PointsStatus.First().UoM = item.Units.Id ?? item.States.Id;
+                    viewModelMap[item.Id].PointsStatus.First().UoM = (item.Units == null) ? item.States.Id : item.Units.Id;
                     // At this point GetPointsSummary does not return the nested Newest field
                     // To be improved
                     if (item.SampleSummary.Newest != null)

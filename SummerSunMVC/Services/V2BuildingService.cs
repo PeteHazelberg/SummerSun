@@ -20,7 +20,7 @@ namespace SummerSunMVC.Services
         private const int _cacheExpirationTimeInMinutes = 30;
         private static Logger _logger = LogManager.GetCurrentClassLogger();
         private ITokenProvider _tokenProvider = null;
-        private EquipmentClient _equipmentClient = null;
+        private readonly ApiClient _api = null;
 
         private Stopwatch _stopWatch =  new Stopwatch();
 
@@ -33,10 +33,10 @@ namespace SummerSunMVC.Services
             IWebProxy proxy = WebProxy.GetDefaultProxy();
 
             _tokenProvider = new TokenClient(clientId, clientSecret, tokenEndpoint, proxy);
-            _equipmentClient = new EquipmentClient(_tokenProvider, buildingApiEndpoint);
+            _api = new ApiClient(_tokenProvider, buildingApiEndpoint);
         }
 
-        public string APIBaseUrl { get { return _equipmentClient.APIBaseUrl; } }
+        public string APIBaseUrl { get { return _api.BaseUrl; } }
 
         public IEnumerable<Company> GetCompanies()
         { 
@@ -45,7 +45,7 @@ namespace SummerSunMVC.Services
             if (companies == null)
             {
                 var token = _tokenProvider.Get();
-                companies = HttpHelper.Get<Company[]>(_equipmentClient.APIBaseUrl.AppendPathSegment("companies").ToString(), token);
+                companies = HttpHelper.Get<Company[]>(_api.BaseUrl.AppendPathSegment("companies").ToString(), token);
 
                 HttpRuntime.Cache.Insert(K_COMPANIES_CACHE_KEY, companies, null, DateTime.UtcNow.AddMinutes(_cacheExpirationTimeInMinutes), Cache.NoSlidingExpiration);
             }
@@ -77,7 +77,7 @@ namespace SummerSunMVC.Services
                 // Let's pick the first in the list...
                 Company c = GetCompanies().FirstOrDefault();
                 _stopWatch.Restart();
-                var url = _equipmentClient.APIBaseUrl.AppendPathSegment("building/types/Equipment");
+                var url = _api.BaseUrl.AppendPathSegment("building/types/Equipment");
                 var resp = HttpHelper.Get<Page<EquipmentType>>(url, _tokenProvider.Get(c));
                  types = (resp == null || resp.Items == null) ? new List<EquipmentType>() : resp.Items;
 
@@ -89,14 +89,19 @@ namespace SummerSunMVC.Services
             return types;
         }
 
-        public IEnumerable<Equipment> GetEquipmentByCompany(string equipmentType, Company company)
+        public IEnumerable<Equipment> GetEquipmentByCompany(string equipmentTypeSearch, Company company)
         {
             // TO DO
             // Cache locally ?
             _stopWatch.Restart();
-            var equipList = _equipmentClient.GetEquipmentAndPointRoles(equipmentType, company);
+            var url = _api.BaseUrl.AppendPathSegment("building/equipment").SetQueryParams(new
+            {
+                type = equipmentTypeSearch,
+                _expand = "pointRoles"
+            });
+            var equipList = _api.GetPage<Equipment>(url, company);
             _stopWatch.Stop();
-            _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} {2} in {3} ms", company.Name, equipList.Count(), equipmentType, _stopWatch.ElapsedMilliseconds));
+            _logger.Debug(string.Format("GetEquipmentAndPointRoles -> {0} found {1} '{2}' in {3} ms", company.Name, equipList.Count(), equipmentTypeSearch, _stopWatch.ElapsedMilliseconds));
             return equipList;
         }
 
@@ -111,13 +116,24 @@ namespace SummerSunMVC.Services
                 requests.Add(ids.Take(50).ToList());
                 ids = ids.Skip(50).ToList();
             }
-            foreach (var item in requests)
-                points.AddRange(_equipmentClient.GetPointsAndSummary(item, c));
+            foreach (var pointIdList in requests)
+                points.AddRange(GetPointsAndSummary(pointIdList, c));
             
             _stopWatch.Stop();
             _logger.Debug(string.Format("GetPointsSummary -> {0} found {1} points with {2} requests in {3} ms", c.Name, points.Count(), requests.Count, _stopWatch.ElapsedMilliseconds));
             return points;
         }
 
+        private IEnumerable<Point> GetPointsAndSummary(IEnumerable<string> pointIds, Company company)
+        {
+            var url = _api.BaseUrl.AppendPathSegment("building/points").SetQueryParams(new
+            {
+                id = string.Join(",", pointIds),
+                _expand = "sampleSummary",
+                _fields = "sampleSummary.updated",
+                _offset = "0"
+            });
+            return _api.GetPage<Point>(url, company);
+        }
     }
 }
