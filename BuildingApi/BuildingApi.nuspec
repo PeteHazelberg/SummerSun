@@ -9,6 +9,6 @@
     <description>$description$</description>
     <releaseNotes>Initial release.</releaseNotes>
     <copyright>Copyright 2014</copyright>
-	<tags>web api client</tags>
+	<tags>http web api client</tags>
   </metadata>
 </package>
