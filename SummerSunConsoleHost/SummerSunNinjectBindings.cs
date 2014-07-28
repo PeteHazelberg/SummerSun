@@ -29,9 +29,7 @@ namespace SummerSun
                 .WithConstructorArgument("endpoint", tokenEndpoint)
                 .WithConstructorArgument("proxy", proxy);
 
-            Bind<ICompanyProvider>().To<CompanyClient>().WithConstructorArgument("endpoint", buildingApiEndpoint); ;
-            this.Bind<EquipmentClient>().To<EquipmentClient>().WithConstructorArgument("buildingApiUrl", buildingApiEndpoint);
-            this.Bind<ApiClient>().To<ApiClient>().WithConstructorArgument("buildingApiUrl", buildingApiEndpoint);
+            this.Bind<ApiClient>().To<ApiClient>().WithConstructorArgument("baseUrl", buildingApiEndpoint);
         }
     }
 }

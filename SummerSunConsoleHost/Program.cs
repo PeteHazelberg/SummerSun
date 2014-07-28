@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using BuildingApi;
@@ -30,16 +31,16 @@ namespace SummerSun
             kernel.Load(new SummerSunNinjectBindings());
             Console.WriteLine("INPUT: CompanySearch= {0} EquipmentType={1}  PointRoleType={2}  pageSize={3}", companySearch, equipmentType, pointRoleType, pageSize);
 
-            var company = PromptToChooseCompany(kernel, companySearch);
+            var api = kernel.Get<ApiClient>();
+            var company = PromptToChooseCompany(api, companySearch);
             Console.WriteLine("Searching company {0} ...", company.Name);
 
             var equip = new Dictionary<string, Equipment>();
-            var sun = kernel.Get<EquipmentClient>();
             var watch = new Stopwatch();
             watch.Start();
             try
             {
-                equip = sun.GetEquipmentAndPointRoles(equipmentType, company, 0, pageSize).ToDictionary(e => e.Id, e => e);
+                equip = api.GetEquipmentAndPointRoles(equipmentType, company, 0, pageSize).ToDictionary(e => e.Id, e => e);
             }
             catch (HttpRequestException httpExc)
             {
@@ -82,7 +83,7 @@ namespace SummerSun
                 for (int i = 0; i < ptIds.Count; i += MaxPointIdsInQueryString)
                 {
                     numOfRequests++;
-                    pts.AddRange(sun.GetPointsAndSummary(ptIds.GetRange(i, Math.Min(MaxPointIdsInQueryString, ptIds.Count - i)), company));
+                    pts.AddRange(api.GetPointsAndSummary(ptIds.GetRange(i, Math.Min(MaxPointIdsInQueryString, ptIds.Count - i)), company));
                 }
                 watch.Stop();
                 Console.WriteLine("Found {0} points on those equipment with \"{1}\" in role type ({2}ms across {3} HTTP GET requests)", pts.Count(), pointRoleType, watch.ElapsedMilliseconds, numOfRequests); 
@@ -130,7 +131,6 @@ namespace SummerSun
             }
             DrawTableLine(tablePattern);
 
-            //var api = kernel.Get<ApiClient>();
             //var url = api.BaseUrl.AppendPathSegments(new[] { "building", "point", point.Id, "samples" }).SetQueryParams(new 
             //{
             //    _startTime = DateTime.UtcNow.AddDays(-1).ToString("s") + "Z",
@@ -179,13 +179,12 @@ namespace SummerSun
             Console.WriteLine(tablePattern, dashes30, dashes30, dashes15, dashes15, dashes15, dashes15);
         }
 
-        private static Company PromptToChooseCompany(IKernel kernel, string companySearch)
+        private static Company PromptToChooseCompany(ApiClient api, string companySearch)
         {
-            var compRepo = kernel.Get<ICompanyProvider>();
             var allCompanies = new List<Company>();
             try
             {
-                allCompanies = compRepo.Get().ToList();
+                allCompanies = api.GetCompanies();
             }
             catch (Exception exc)
             {
@@ -220,22 +219,30 @@ namespace SummerSun
         private const int MaxPointIdsInQueryString = 50;
     }
 
-    public class ApiClient
+    internal static class ApiClientExtensions
     {
-        private readonly string baseUrl;
-        private readonly ITokenProvider tokens;
-        public ApiClient(ITokenProvider tokenProvider, string buildingApiUrl)
+        public static IEnumerable<Equipment> GetEquipmentAndPointRoles(this ApiClient api, string equipmentType, Company company, int offset = 0, int max = 200)
         {
-            this.tokens = tokenProvider;
-            this.baseUrl = buildingApiUrl;
+            var url = api.BaseUrl.AppendPathSegment("building/equipment").SetQueryParams(new
+            {
+                type = equipmentType,
+                _expand = "pointRoles",
+                _offset = offset.ToString(CultureInfo.InvariantCulture),
+                _limit = max.ToString(CultureInfo.InvariantCulture)
+            });
+            return api.GetPage<Equipment>(url, company);
         }
 
-        public string BaseUrl { get { return baseUrl; } }
-
-        public IEnumerable<T> Get<T>(Url url, Company company, int offset = 0, int limit = 200)
+        public static IEnumerable<Point> GetPointsAndSummary(this ApiClient api, IEnumerable<string> pointIds, Company company)
         {
-            var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), tokens);
-            return (resp == null || resp.Items == null) ? new List<T>() : resp.Items;
+            var url = api.BaseUrl.AppendPathSegment("building/points").SetQueryParams(new
+            {
+                id = string.Join(",", pointIds),
+                _expand = "sampleSummary,attributes",
+                _fields = "sampleSummary.updated",
+                _offset = "0"
+            });
+            return api.GetPage<Point>(url, company);
         }
     }
 }
