@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Merged in Kyle's additions for authentication and POST support</releaseNotes>
+    <releaseNotes>Added more ApiClient convenience methods</releaseNotes>
     <copyright>Copyright 2014</copyright>
 	<tags>http web building api jci</tags>
   </metadata>
