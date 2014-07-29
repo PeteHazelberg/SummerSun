@@ -57,7 +57,7 @@
     <Compile Include="ITokenProvider.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="Page.cs" />
-    <Compile Include="PasswordCredentials.cs" />
+    <Compile Include="PasswordCredential.cs" />
     <Compile Include="PasswordTokenClient.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="PointRole.cs" />
