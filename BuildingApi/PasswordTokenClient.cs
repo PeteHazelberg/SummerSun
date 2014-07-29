@@ -41,6 +41,11 @@ namespace BuildingApi
         /// <returns></returns>
         public Token Get(Company company, bool invalidateCache = false)
         {
+            if (company == null)
+            {
+                throw new InvalidOperationException("PasswordTokenClient can only issue tokens for a specific company.");
+            }
+
             var now = DateTime.UtcNow;
             Token token;
 
