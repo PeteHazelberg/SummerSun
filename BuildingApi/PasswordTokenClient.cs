@@ -39,7 +39,7 @@ namespace BuildingApi
         /// <param name="company"></param>
         /// <param name="invalidateCache">if set to true, requests a new token even if a valid one is already in the cache</param>
         /// <returns></returns>
-        public Token Get(Company company, bool invalidateCache = false)
+        public Token Get(Company company, string scope = "panoptix.read", bool invalidateCache = false)
         {
             if (company == null)
             {
@@ -63,7 +63,7 @@ namespace BuildingApi
             var serviceAccount = serviceAccounts[company.Id];
 
             // so that instances created by different applications (as indicated by id passed at construction) don't clobber each other
-            string cacheKey = String.Format("{0}:{1}:{2}", clientId, company.Id, serviceAccount.AccountId);
+            string cacheKey = String.Format("{0}:{1}:{2}:{3}", clientId, company.Id, serviceAccount.AccountId, scope);
 
             // check to see if we already have a token that will be valid for at least the next five minutes
             if (!invalidateCache && Cache.ContainsKey(cacheKey) && Cache[cacheKey].ExpirationTime > now.AddMinutes(5))
@@ -75,7 +75,7 @@ namespace BuildingApi
                 var contentList = new List<KeyValuePair<string, string>>
                         {
                             new KeyValuePair<string, string>("grant_type", "password"),
-                            new KeyValuePair<string, string>("scope", "panoptix.read"),
+                            new KeyValuePair<string, string>("scope", scope),
                             new KeyValuePair<string, string>("username", serviceAccount.AccountId),
                             new KeyValuePair<string, string>("password", serviceAccount.Password),
                         };

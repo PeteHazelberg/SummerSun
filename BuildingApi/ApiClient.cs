@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using Common.Logging;
 using Flurl;
 
 namespace BuildingApi
@@ -22,7 +25,7 @@ namespace BuildingApi
         public IEnumerable<T> GetPage<T>(Url url, Company company)
         {
             var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), Tokens);
-            return (resp == null || resp.Items == null) ? new List<T>() : resp.Items;
+            return ExtractItemsFromPage(resp);
         }
 
         /// <summary>
@@ -42,12 +45,68 @@ namespace BuildingApi
         }
 
         /// <summary>
+        /// GET all pages of a paged resource.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="company"></param>
+        /// <returns></returns>
+        public IEnumerable<T> GetAll<T>(Url url, Company company)
+        {
+            var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), Tokens);
+            var all = ExtractItemsFromPage(resp).ToList();
+            while (resp != null && resp.Next != null && resp.Next.Href != null)
+            {
+                resp = HttpHelper.Get<Page<T>>(company, resp.Next.Href, Tokens);
+                all.AddRange(ExtractItemsFromPage(resp));
+            }
+            return all;
+        }
+
+        /// <summary>
+        /// Filter the list of resources to those that contain a specific string in their Name attribute.
+        /// </summary>
+        /// <returns>Null if unable to find only one instance</returns>
+        public T FindExactlyOneInstanceByName<T>(Url url, string nameFragmentToSearchFor, Company company)
+        {
+            var urlWithFilter = new Url(url).SetQueryParam("name", nameFragmentToSearchFor);
+            var instances = GetAll<T>(url, company).ToList();
+            if (!instances.Any())
+            {
+                Log.Warn(m => m("No {0} was found with {1} in its name.", url.Path.Last(), nameFragmentToSearchFor));
+                return default(T);
+            }
+            if (instances.Count() == 1) return instances[0];
+            if (Log.IsWarnEnabled)
+            {
+                var bldr = new StringBuilder("Ambiguous Name (Multiple Matches Found)");
+                foreach (var inst in instances)
+                {
+                    dynamic instance = inst;
+                    bldr.Append(Environment.NewLine).Append(instance.Name).Append("    ").Append(instance.Href);
+                }
+                Log.Warn(bldr.ToString());
+            }
+            return default(T);
+        }
+
+        public T Post<T>(Url url, Company company, T payload, string tokenScope = "panoptix.write")
+        {
+            return HttpHelper.Post(url.ToString(), Tokens.Get(company, tokenScope), payload);
+        }
+
+        /// <summary>
         /// GET the list of all companies that you have visibility to.
         /// </summary>
         public List<Company> GetCompanies()
         {
             var token = Tokens.Get();
             return HttpHelper.Get<List<Company>>(BaseUrl.AppendPathSegment("companies").ToString(), token);
+        }
+
+        private static IEnumerable<T> ExtractItemsFromPage<T>(Page<T> resp)
+        {
+            return (resp == null || resp.Items == null) ? new List<T>() : resp.Items;
         }
 
         public ApiClient(ITokenProvider tokenProvider, string baseUrl)
@@ -58,5 +117,6 @@ namespace BuildingApi
 
         private readonly string baseUrl;
         private readonly ITokenProvider tokens;
+        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
     }
 }

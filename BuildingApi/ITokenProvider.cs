@@ -6,8 +6,8 @@
         /// Get a JCI security token
         /// </summary>
         /// <param name="company"></param>
+        /// <param name="scope"></param>
         /// <param name="refreshCache">if set to true, gets a new token from IMS even if a valid one is already in the cache</param>
-        /// <returns></returns>
-        Token Get(Company company = null, bool refreshCache = false);
+        Token Get(Company company = null, string scope = "panoptix.read", bool refreshCache = false);
     }
 }
