@@ -1,27 +1,12 @@
-﻿
-using System;
-using Newtonsoft.Json.Linq;
+﻿using System;
 
 namespace BuildingApi
 {
-    public class Point : EntityLink, IEquatable<Point>
+    public class Point : Entity, IEquatable<Point>
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
         public EntityLink Units { get; set; }
         public EntityLink States { get; set; }
         public SampleSummary SampleSummary { get; set; }
-        public JObject Attributes { get; set; }
-
-        public string GetAttribute(string group, string name)
-        {
-            if (this.Attributes == null
-                || this.Attributes[group] == null
-                || this.Attributes[group]["attributes"] == null
-                || this.Attributes[group]["attributes"][name] == null) return string.Empty;
-
-            return this.Attributes[group]["attributes"].Value<string>(name);
-        }
 
         public override bool Equals(object obj)
         {

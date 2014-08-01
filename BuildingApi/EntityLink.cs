@@ -1,8 +1,7 @@
 ﻿namespace BuildingApi
 {
-    public class EntityLink
+    public class EntityLink : Link
     {
         public string Id { get; set; }
-        public string Href { get; set; }
     }
 }

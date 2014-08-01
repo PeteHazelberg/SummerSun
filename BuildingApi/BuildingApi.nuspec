@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Cleaned up package references</releaseNotes>
+    <releaseNotes>Added Entity class to put user-defined Attributes on Equipment and Spaces</releaseNotes>
     <copyright>Copyright 2014</copyright>
 	<tags>http web building api jci</tags>
   </metadata>

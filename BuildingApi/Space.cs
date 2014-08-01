@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace BuildingApi
 {
-    public class Space : EntityLink
+    public class Space : Entity
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
         public EntityLink Type { get; set; }
     }
 }

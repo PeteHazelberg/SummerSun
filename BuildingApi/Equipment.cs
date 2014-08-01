@@ -2,10 +2,8 @@
 
 namespace BuildingApi
 {
-    public class Equipment : EntityLink
+    public class Equipment : Entity
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
         public EntityLink Type { get; set; }
         [JsonProperty(PropertyName = "isLocatedInSpace")]
         public EntityLink Location { get; set; }

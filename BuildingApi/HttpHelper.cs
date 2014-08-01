@@ -27,12 +27,7 @@ namespace BuildingApi
         {
             if (response.IsSuccessStatusCode)
             {
-                return JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result,
-                    new JsonSerializerSettings
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                        NullValueHandling = NullValueHandling.Ignore
-                    });
+                return DeserializeObject<T>(response.Content.ReadAsStringAsync().Result);
             }
             var errorDescription = response.Content.ReadAsStringAsync().Result;
             var message = string.Format("Unsuccessful {0}: {1}{2}\tResponse: {3} {4} {5} {6}", httpAction, url, Environment.NewLine, response.StatusCode,
@@ -90,11 +85,7 @@ namespace BuildingApi
 
         public static HttpResponseMessage Post(string url, Token token, Object payload)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(payload, new JsonSerializerSettings
-                    {
-                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                        NullValueHandling = NullValueHandling.Ignore
-                    }), System.Text.Encoding.UTF8, "application/json");
+            var content = new StringContent(SerializeObject(payload), System.Text.Encoding.UTF8, "application/json");
 
             var handler = new HttpClientHandler
             {
@@ -140,6 +131,25 @@ namespace BuildingApi
                 Log.DebugFormat("Result={0} Action=DELETE Url='{1}' TimeTakenMs={2}", (Int32)result.StatusCode, url, sw.ElapsedMilliseconds);
                 return result;
             }
+        }
+
+        public static T DeserializeObject<T>(string payloadText)
+        {
+            return JsonConvert.DeserializeObject<T>(payloadText,
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+        }
+
+        public static string SerializeObject(object payload)
+        {
+            return JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                NullValueHandling = NullValueHandling.Ignore
+            });
         }
 
         private static readonly ILog Log = LogManager.GetCurrentClassLogger();
