@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Added Entity class to put user-defined Attributes on Equipment and Spaces</releaseNotes>
+    <releaseNotes>Ease Common.Logging dependency to v2.1.2 or later</releaseNotes>
     <copyright>Copyright 2014</copyright>
 	<tags>http web building api jci</tags>
   </metadata>
