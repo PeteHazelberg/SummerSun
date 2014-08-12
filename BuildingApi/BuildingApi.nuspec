@@ -7,8 +7,8 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Ease Common.Logging dependency to v2.1.2 or later</releaseNotes>
+    <releaseNotes>Add Created/Updated audit properties to Sample</releaseNotes>
     <copyright>Copyright 2014</copyright>
-	<tags>http web building api jci</tags>
+    <tags>http web building api jci</tags>
   </metadata>
 </package>

@@ -12,5 +12,10 @@ namespace BuildingApi
         public DateTime Timestamp { get; set; }
 
         public string[] Flags { get; set; }
+
+        public AuditInfo Created { get; set; }
+
+        public AuditInfo Updated { get; set; }
+
     }
 }

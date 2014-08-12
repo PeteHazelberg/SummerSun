@@ -8,7 +8,9 @@ namespace BuildingApi
         public string Name { get; set; }
         public string Description { get; set; }
         public JObject Attributes { get; set; }
-        
+        public AuditInfo Created { get; set; }
+        public AuditInfo Updated { get; set; }
+
         /// <summary>
         /// Extracts an individual attribute value out of the relatively complex Attributes JSON structure.
         /// </summary>
