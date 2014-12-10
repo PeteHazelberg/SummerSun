@@ -8,6 +8,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
+      0.3.1
+      Point now exposes SamplesRequested boolean
+      
       0.3
       Add Async methods to API; obsolete non-async versions
       
