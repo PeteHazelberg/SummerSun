@@ -51,14 +51,14 @@ namespace BuildingApi
             else
             {
                 var contentList = new List<KeyValuePair<string, string>>
-                        {
-                            new KeyValuePair<string, string>("grant_type", "client_credentials")
-                        };
+                {
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("scope", scope)
+                };
 
                 if (company != null && company.Id != null)
                 {
                     contentList.Add(new KeyValuePair<string, string>("jci_company_id", company.Id));
-                    contentList.Add(new KeyValuePair<string, string>("scope", scope));
                 }
 
                 token = FetchToken(company, cacheKey, Cache, contentList);
