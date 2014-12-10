@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Common.Logging;
 using Flurl;
 
@@ -22,6 +23,7 @@ namespace BuildingApi
         /// <summary>
         /// GET a single page of resources that are owned by a particular company. GET the next page by requesting Page.Next, if desired.
         /// </summary>
+        [Obsolete("Use async versions")]
         public IEnumerable<T> GetPage<T>(Url url, Company company)
         {
             var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), Tokens);
@@ -31,6 +33,7 @@ namespace BuildingApi
         /// <summary>
         /// GET a resource that is owned by a particular company.
         /// </summary>
+        [Obsolete("Use async versions")]
         public T Get<T>(Url url, Company company)
         {
             return HttpHelper.Get<T>(company, url.ToString(), Tokens);
@@ -39,6 +42,7 @@ namespace BuildingApi
         /// <summary>
         /// GET a resource that is not specific to a particular company (e.g., list /building/types/*, /companies, etc.).
         /// </summary>
+        [Obsolete("Use async versions")]
         public T Get<T>(Url url)
         {
             return HttpHelper.Get<T>(url.ToString(), Tokens.Get());
@@ -51,6 +55,7 @@ namespace BuildingApi
         /// <param name="url"></param>
         /// <param name="company"></param>
         /// <returns></returns>
+        [Obsolete("Use async versions")]
         public IEnumerable<T> GetAll<T>(Url url, Company company)
         {
             var resp = HttpHelper.Get<Page<T>>(company, url.ToString(), Tokens);
@@ -90,6 +95,7 @@ namespace BuildingApi
             return default(T);
         }
 
+        [Obsolete("Use async versions")]
         public T Post<T>(Url url, Company company, T payload, string tokenScope = "panoptix.write")
         {
             return HttpHelper.Post(url.ToString(), Tokens.Get(company, tokenScope), payload);
@@ -98,10 +104,69 @@ namespace BuildingApi
         /// <summary>
         /// GET the list of all companies that you have visibility to.
         /// </summary>
+        [Obsolete("Use async versions")]
         public List<Company> GetCompanies()
         {
             var token = Tokens.Get();
             return HttpHelper.Get<List<Company>>(BaseUrl.AppendPathSegment("companies").ToString(), token);
+        }
+
+        /// <summary>
+        /// GET a single page of resources that are owned by a particular company. GET the next page by requesting Page.Next, if desired.
+        /// </summary>
+        public async Task<IEnumerable<T>> GetPageAsync<T>(Url url, Company company)
+        {
+            var resp = await HttpHelper.GetAsync<Page<T>>(company, url.ToString(), Tokens);
+            return ExtractItemsFromPage(resp);
+        }
+
+        /// <summary>
+        /// GET a resource that is owned by a particular company.
+        /// </summary>
+        public Task<T> GetAsync<T>(Url url, Company company)
+        {
+            return HttpHelper.GetAsync<T>(company, url.ToString(), Tokens);
+        }
+
+        /// <summary>
+        /// GET a resource that is not specific to a particular company (e.g., list /building/types/*, /companies, etc.).
+        /// </summary>
+        public Task<T> GetAsync<T>(Url url)
+        {
+            return HttpHelper.GetAsync<T>(url.ToString(), Tokens.Get());
+        }
+
+        /// <summary>
+        /// GET all pages of a paged resource.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url"></param>
+        /// <param name="company"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> GetAllAsync<T>(Url url, Company company)
+        {
+            var resp = await HttpHelper.GetAsync<Page<T>>(company, url.ToString(), Tokens);
+            var all = ExtractItemsFromPage(resp).ToList();
+            while (resp != null && resp.Next != null && resp.Next.Href != null)
+            {
+                resp = await HttpHelper.GetAsync<Page<T>>(company, resp.Next.Href, Tokens);
+                all.AddRange(ExtractItemsFromPage(resp));
+            }
+            return all;
+        }
+
+        public Task<T> PostAsync<T>(Url url, Company company, T payload, string tokenScope = "panoptix.write")
+        {
+            return HttpHelper.PostAsync(url.ToString(), Tokens.Get(company, tokenScope), payload);
+        }
+
+        /// <summary>
+        /// GET the list of all companies that you have visibility to.
+        /// </summary>
+        public Task<List<Company>> GetCompaniesAsync()
+        {
+            var token = Tokens.Get();
+            return HttpHelper.GetAsync<List<Company>>(BaseUrl.AppendPathSegment("companies").ToString(), token);
         }
 
         private static IEnumerable<T> ExtractItemsFromPage<T>(Page<T> resp)

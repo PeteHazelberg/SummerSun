@@ -7,7 +7,11 @@
     <authors>$author$</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Add Created/Updated audit properties to Sample</releaseNotes>
+    <releaseNotes>
+      0.3
+      Add Async methods to API; obsolete non-async versions
+      
+      Add Created/Updated audit properties to Sample</releaseNotes>
     <copyright>Copyright 2014</copyright>
     <tags>http web building api jci</tags>
   </metadata>
