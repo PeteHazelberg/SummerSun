@@ -4,7 +4,7 @@
     <id>$id$</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>$author$</authors>
+    <authors>Pete Hazelberg, Kyle Stittleburg, Justin Ploegert</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
@@ -15,7 +15,7 @@
       Add Async methods to API; obsolete non-async versions
       
       Add Created/Updated audit properties to Sample</releaseNotes>
-    <copyright>Copyright 2014</copyright>
+    <copyright>Copyright 2014-15</copyright>
     <tags>http web building api jci</tags>
   </metadata>
 </package>
