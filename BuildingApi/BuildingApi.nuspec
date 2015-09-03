@@ -8,6 +8,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
+      0.4
+      Remove Common.Logging dependency
+      Mark ApiClient and HttpHelper as obsolete
+      More complete JSON model classes
+      
       0.3.1
       Point now exposes SamplesRequested boolean
       
