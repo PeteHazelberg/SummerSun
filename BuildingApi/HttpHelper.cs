@@ -10,6 +10,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace BuildingApi
 {
+    [Obsolete("Use Flurl.Http package instead. This class will be removed in a future version.")]
     public static class HttpHelper
     {
         [Obsolete("Use async methods")]

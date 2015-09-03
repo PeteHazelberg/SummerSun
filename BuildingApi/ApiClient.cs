@@ -8,6 +8,7 @@ using Flurl;
 
 namespace BuildingApi
 {
+    [Obsolete("Use Flurl.Http package instead. This class will be removed in a future version.")]
     public class ApiClient
     {
         /// <summary>
