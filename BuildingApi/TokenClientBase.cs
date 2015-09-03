@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Common.Logging;
+using System.Text;
+using BuildingApi.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -16,14 +17,14 @@ namespace BuildingApi
         protected readonly string clientId;
         protected readonly string credentials;
         protected readonly string endpointUrl;
-        private static readonly ILog Log = LogManager.GetLogger<TokenClientBase>();
+        private static readonly ILog Log = LogProvider.For<TokenClientBase>();
 
         protected TokenClientBase(string id, string secret, string endpointUrl, IWebProxy proxy)
         {
             this.endpointUrl = endpointUrl;
             this.clientId = id;
             // base 64 encode client and secret for the Authorization header
-            credentials = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(id + ":" + secret));
+            credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(id + ":" + secret));
             this.proxy = proxy;
         }
 

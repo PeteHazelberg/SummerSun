@@ -2,18 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Common.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace BuildingApi
 {
     public class ClientCredentialsTokenClient : TokenClientBase, ITokenProvider
     {
-        private readonly ILog log = LogManager.GetLogger<ClientCredentialsTokenClient>();
-
         private static readonly ConcurrentDictionary<string, Token> Cache = new ConcurrentDictionary<string, Token>();
 
         /// <summary>

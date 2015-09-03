@@ -3,13 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Common.Logging;
+using BuildingApi.Logging;
 
 namespace BuildingApi
 {
     public class PasswordTokenClient : TokenClientBase, ITokenProvider
     {
-        private readonly ILog log = LogManager.GetLogger<ClientCredentialsTokenClient>();
+        private readonly ILog log = LogProvider.For<ClientCredentialsTokenClient>();
 
         private static readonly ConcurrentDictionary<string, Token> Cache = new ConcurrentDictionary<string, Token>();
 

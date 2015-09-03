@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Logging;
+using BuildingApi.Logging;
 using Flurl;
 
 namespace BuildingApi
@@ -79,11 +79,11 @@ namespace BuildingApi
             var instances = GetAll<T>(url, company).ToList();
             if (!instances.Any())
             {
-                Log.Warn(m => m("No {0} was found with {1} in its name.", url.Path.Last(), nameFragmentToSearchFor));
+                Log.Warn(string.Format("No {0} was found with {1} in its name.", url.Path.Last(), nameFragmentToSearchFor));
                 return default(T);
             }
             if (instances.Count() == 1) return instances[0];
-            if (Log.IsWarnEnabled)
+            if (Log.IsWarnEnabled())
             {
                 var bldr = new StringBuilder("Ambiguous Name (Multiple Matches Found)");
                 foreach (var inst in instances)
@@ -183,6 +183,6 @@ namespace BuildingApi
 
         private readonly string baseUrl;
         private readonly ITokenProvider tokens;
-        private static readonly ILog Log = LogManager.GetCurrentClassLogger();
+        private static readonly ILog Log = LogProvider.GetCurrentClassLogger();
     }
 }
