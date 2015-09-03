@@ -2,7 +2,7 @@
 
 namespace BuildingApi
 {
-    public class Page<T> : Link
+    public class Page<T>
     {
         public IEnumerable<T> Items { get; set; }
         public Link Next { get; set; }

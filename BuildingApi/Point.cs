@@ -8,6 +8,9 @@ namespace BuildingApi
         public EntityLink States { get; set; }
         public SampleSummary SampleSummary { get; set; }
         public bool? SamplesRequested { get; set; }
+        public EntityLink Samples { get; set; }
+        public Page<PointRole> PerformsPointRoles { get; set; }
+        public Page<Equipment> IsUsedByEquipment { get; set; }
 
         public override bool Equals(object obj)
         {
